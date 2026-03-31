@@ -1,21 +1,21 @@
-<main class="container">
-  <h1>Welcome to Tauri + Angular!</h1>
+<ion-app>
+  <ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>TurboTainer - YT Downloader</ion-title>
+    </ion-toolbar>
+  </ion-header>
 
-  <div class="row">
-    <a href="https://tauri.app" target="_blank">
-      <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
-    </a>
-    <a href="https://angular.io" target="_blank">
-      <img src="/assets/angular.svg" class="logo angular" alt="Angular logo" />
-    </a>
-  </div>
-  <p>Click on the logos to learn more about the frameworks</p>
+  <ion-content class="ion-padding">
+    <h2>Bienvenido a la versión Pro</h2>
+    <p>Esta interfaz se adaptará automáticamente a móvil y escritorio.</p>
 
-  <form class="row" (submit)="greet($event, greetInput.value)">
-    <input #greetInput id="greet-input" placeholder="Enter a name..." />
-    <button type="submit">Greet</button>
-  </form>
-  <p>{{ greetingMessage }}</p>
+    <ion-item>
+      <ion-label position="stacked">URL de YouTube</ion-label>
+      <ion-input placeholder="https://youtube.com/..."></ion-input>
+    </ion-item>
 
-  <router-outlet />
-</main>
+    <ion-button expand="block" class="ion-margin-top">
+      Comprobar URL
+    </ion-button>
+  </ion-content>
+</ion-app>

@@ -1,1 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
+/* Core de Ionic (Funcionalidad) */
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+
+/* Variables de color personalizadas (Tu propia marca) */
+:root {
+    --ion-color-primary: #3880ff;
+    /* Puedes cambiar esto a tu gusto */
+    --ion-font-family: 'Inter', sans-serif;
+}
