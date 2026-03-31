@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TauriService } from './services/tauri.service';
-import { IonApp, IonContent, IonHeader, IonToolbar, IonTitle, IonInput, IonButton, IonItem, IonLabel, IonIcon, IonCard, IonCardContent, IonRow, IonCol, IonSpinner, IonText, IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
+import { IonApp, IonContent, IonHeader, IonToolbar, IonTitle, IonInput, IonButton, IonItem, IonLabel, IonIcon, IonCard, IonCardContent, IonRow, IonCol, IonSpinner, IonText, IonCardHeader, IonCardTitle, IonCardSubtitle, IonProgressBar } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   musicalNotesOutline,
@@ -23,7 +23,9 @@ import {
     IonLabel, IonIcon, IonCard, IonCardContent, IonRow,
     IonCol, IonSpinner, IonText,
     IonCardHeader,
-    IonCardTitle
+    IonCardTitle,
+    IonCardSubtitle,
+    IonProgressBar
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
@@ -62,5 +64,8 @@ export class AppComponent {
   cancelar() {
     this.url = ''; // Limpiamos el input
     this.tauriService.reset(); // Movemos el estado a 'IDLE'
+  }
+  iniciarDescarga() {
+    this.tauriService.iniciarDescarga();
   }
 }
