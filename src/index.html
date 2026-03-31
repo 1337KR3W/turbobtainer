@@ -1,12 +1,21 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Tauri + Angular</title>
-    <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
-  <body>
-    <app-root></app-root>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Tauri + Angular</title>
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    // Esto ayuda a depurar si Tauri está cargando
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log("Entorno detectado:", window.__TAURI_INTERNALS__ ? "Tauri Nativo" : "Navegador");
+    });
+  </script>
+</head>
+
+<body>
+  <app-root></app-root>
+</body>
+
 </html>

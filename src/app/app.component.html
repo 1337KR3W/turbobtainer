@@ -11,11 +11,23 @@
 
     <ion-item>
       <ion-label position="stacked">URL de YouTube</ion-label>
-      <ion-input placeholder="https://youtube.com/..."></ion-input>
+      <ion-input [(ngModel)]="url" placeholder="https://youtube.com/...">
+      </ion-input>
     </ion-item>
 
-    <ion-button expand="block" class="ion-margin-top">
+    <ion-button expand="block" class="ion-margin-top" (click)="getMetadata()">
       Comprobar URL
     </ion-button>
+
+    @if (titulo) {
+    <div class="ion-margin-top">
+      <ion-item lines="none">
+        <ion-label>
+          <strong>Video detectado:</strong>
+          <p>{{ titulo }}</p>
+        </ion-label>
+      </ion-item>
+    </div>
+    }
   </ion-content>
 </ion-app>
