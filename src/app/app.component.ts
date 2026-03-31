@@ -1,16 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common'; // Necesario para *ngIf
-import { invoke } from '@tauri-apps/api/core';
+import { CommonModule } from '@angular/common';
+import { TauriService } from './services/tauri.service';
+import { IonApp, IonContent, IonHeader, IonToolbar, IonTitle, IonInput, IonButton, IonItem, IonLabel, IonIcon, IonCard, IonCardContent, IonRow, IonCol, IonSpinner, IonText, IonCardHeader, IonCardTitle } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
 import {
-  IonApp, IonContent, IonHeader, IonToolbar,
-  IonTitle, IonInput, IonButton, IonItem,
-  IonLabel, IonIcon, IonCard, IonCardContent,
-  IonRow, IonCol, IonSpinner, IonCardHeader,
-  IonCardTitle, IonCardSubtitle
-} from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons'; // Para que los iconos se vean
-import { musicalNotesOutline, videocamOutline, logoYoutube, informationCircleOutline } from 'ionicons/icons';
+  musicalNotesOutline,
+  videocamOutline,
+  checkmarkDoneOutline,
+  alertCircleOutline,
+  trashOutline,
+  cloudDownloadOutline,
+  logoYoutube
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-root',
@@ -19,44 +21,46 @@ import { musicalNotesOutline, videocamOutline, logoYoutube, informationCircleOut
     CommonModule, FormsModule, IonApp, IonContent, IonHeader,
     IonToolbar, IonTitle, IonInput, IonButton, IonItem,
     IonLabel, IonIcon, IonCard, IonCardContent, IonRow,
-    IonCol, IonSpinner, IonCardHeader, IonCardTitle, IonCardSubtitle
+    IonCol, IonSpinner, IonText,
+    IonCardHeader,
+    IonCardTitle
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  // ✅ Inyectamos el servicio para acceder a su estado (state)
+  public tauriService = inject(TauriService);
+
+  // La URL es lo único que mantenemos local porque pertenece al formulario activo
   url: string = '';
-  titulo: string = '';
-  loading: boolean = false;
-  mensajeError: string = '';
 
   constructor() {
-    // Registramos los iconos para que Ionic los renderice
-    addIcons({ musicalNotesOutline, videocamOutline, logoYoutube, informationCircleOutline });
+    addIcons({
+      musicalNotesOutline,
+      videocamOutline,
+      checkmarkDoneOutline,
+      alertCircleOutline,
+      trashOutline,
+      cloudDownloadOutline,
+      logoYoutube
+    });
   }
 
-  // Esta es la función que deben llamar tus botones en el HTML
-  async procesarEnlace(tipo: 'audio' | 'video') {
-    if (!this.url) return;
-
-    this.loading = true;
-    this.titulo = '';
-    this.mensajeError = '';
-
-    try {
-      // Llamamos a Rust (PMO-6)
-      const resultado = await invoke<string>('check_video_url', { url: this.url });
-      this.titulo = resultado;
-      console.log(`Modo ${tipo} preparado para: ${this.titulo}`);
-    } catch (error) {
-      this.mensajeError = error as string;
-    } finally {
-      this.loading = false;
+  /**
+   * Acción para los botones de Audio/Video
+   */
+  analizar(tipo: 'audio' | 'video') {
+    if (this.url.trim()) {
+      this.tauriService.obtenerMetadata(this.url, tipo);
     }
   }
 
-  limpiarEstado() {
-    this.titulo = '';
-    this.mensajeError = '';
+  /**
+   * Acción para resetear y volver al inicio
+   */
+  cancelar() {
+    this.url = ''; // Limpiamos el input
+    this.tauriService.reset(); // Movemos el estado a 'IDLE'
   }
 }
