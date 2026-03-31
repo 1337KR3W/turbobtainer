@@ -1,13 +1,23 @@
 use tauri_plugin_shell::ShellExt;
+use tauri::Manager; // Necesario para algunas funciones de AppHandle
 
-// 1. Definimos nuestro comando de descarga/check
 #[tauri::command]
 async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, String> {
-    // Invocamos el sidecar configurado en tauri.conf.json
+    // Validación de URL
+    if !url.contains("youtube.com") && !url.contains("youtu.be") {
+        return Err("La URL no es de YouTube.".into());
+    }
+
+    // Configuración del Sidecar
     let sidecar_command = app.shell()
         .sidecar("yt-dlp")
-        .map_err(|e| format!("Error al cargar sidecar: {}", e))?
-        .args(["--get-title", &url]);
+        .map_err(|e| format!("Error Sidecar: {}", e))?
+        .args([
+            "--get-title", 
+            "--no-playlist", 
+            "--skip-download", 
+            &url
+        ]);
 
     let output = sidecar_command.output().await
         .map_err(|e| format!("Error de ejecución: {}", e))?;
@@ -24,12 +34,10 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, S
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        // Mantenemos opener si quieres abrir carpetas después, 
-        // pero añadimos el plugin de shell que es vital para yt-dlp
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_shell::init()) 
-        .invoke_handler(tauri::generate_handler![
-            check_video_url // <--- Registramos AQUÍ nuestro comando
+                .invoke_handler(tauri::generate_handler![
+            check_video_url
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
