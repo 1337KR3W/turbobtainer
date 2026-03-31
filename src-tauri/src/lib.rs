@@ -33,29 +33,21 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, S
 
 #[tauri::command]
 async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Result<String, String> {
-    // 1. Ruta de Descargas
+    // 1. Ruta de Descargas del usuario
     let download_dir = app.path().download_dir()
         .map_err(|e| format!("No se encontró la carpeta de descargas: {}", e))?;
     
     let output_path = download_dir.join("TurboTainer_%(title).200s.%(ext)s");
     let output_str = output_path.to_string_lossy();
 
-    // 2. Localizar la carpeta donde están los binarios (sidecars)
-    // En Tauri 2, los recursos se encuentran en el resolve_resource
-    // Pero la forma más fiable para yt-dlp es pasarle el nombre del sidecar 
-    // y dejar que el PATH interno de la shell de Tauri lo encuentre, 
-    // o simplemente no pasarle nada si están en la misma carpeta.
-    
-    // Sin embargo, para ser precisos con el error anterior, vamos a omitir el path 
-    // absoluto complejo y usar una estrategia de "Directorio de Ejecución".
-    
+    // 2. Definición de argumentos
+    // Se ha eliminado --no-buffer por incompatibilidad y se añadió el formato MP4
     let mut args = vec![
         "--newline",
         "--progress",
         "--progress-template", "download:%(progress._percent_str)s",
         "--no-playlist",
-        // Eliminamos la detección manual de ruta que falló y usamos una ruta relativa
-        // yt-dlp suele buscar ffmpeg en el mismo directorio donde él reside.
+        "--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
         "-o", &output_str,
     ];
 
@@ -65,7 +57,7 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
     
     args.push(&url);
 
-    // 3. Lanzar yt-dlp
+    // 3. Lanzar yt-dlp sidecar
     let (mut rx, _child) = app.shell()
         .sidecar("yt-dlp")
         .map_err(|e| format!("Error con sidecar yt-dlp: {}", e))?
@@ -73,7 +65,7 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
         .spawn()
         .map_err(|e| format!("Error al iniciar descarga: {}", e))?;
 
-    // 4. Hilo de escucha (Mismo código de antes)
+    // 4. Hilo de escucha de eventos (Stdout para progreso, Stderr para errores)
     tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
             match event {
@@ -91,16 +83,19 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
                     }
                 },
                 tauri_plugin_shell::process::CommandEvent::Stderr(line) => {
+                    // Log de errores en la terminal para depuración
                     eprintln!("🔴 YT-DLP LOG: {}", String::from_utf8_lossy(&line));
                 },
                 _ => {}
             }
         }
+        // Al terminar el stream de datos, aseguramos que la UI reciba el 100%
         let _ = app.emit("download-progress", 1.0);
     });
 
     Ok("Proceso iniciado".into())
 }
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
