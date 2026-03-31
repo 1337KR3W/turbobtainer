@@ -5,8 +5,8 @@
   "identifier": "com.turbobtainer.1337KR3W",
   "build": {
     "beforeDevCommand": "npm run start",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:4200",
+    "beforeBuildCommand": "ng serve",
     "frontendDist": "../dist/turbobtainer/browser"
   },
   "app": {
