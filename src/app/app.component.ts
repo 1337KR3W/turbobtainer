@@ -1,32 +1,62 @@
-import { Component } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
-import { IonApp, IonContent, IonHeader, IonToolbar, IonTitle, IonInput, IonButton, IonItem, IonLabel } from '@ionic/angular/standalone';
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common'; // Necesario para *ngIf
 import { invoke } from '@tauri-apps/api/core';
-import { FormsModule } from '@angular/forms'; // <--- 1. Importación necesaria
+import {
+  IonApp, IonContent, IonHeader, IonToolbar,
+  IonTitle, IonInput, IonButton, IonItem,
+  IonLabel, IonIcon, IonCard, IonCardContent,
+  IonRow, IonCol, IonSpinner, IonCardHeader,
+  IonCardTitle, IonCardSubtitle
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons'; // Para que los iconos se vean
+import { musicalNotesOutline, videocamOutline, logoYoutube, informationCircleOutline } from 'ionicons/icons';
 
 @Component({
-  selector: "app-root",
+  selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, IonApp, IonContent, IonHeader, IonToolbar, IonTitle, IonInput, IonButton, IonItem, IonLabel, FormsModule],
-  templateUrl: "./app.component.html",
-  styleUrl: "./app.component.css",
+  imports: [
+    CommonModule, FormsModule, IonApp, IonContent, IonHeader,
+    IonToolbar, IonTitle, IonInput, IonButton, IonItem,
+    IonLabel, IonIcon, IonCard, IonCardContent, IonRow,
+    IonCol, IonSpinner, IonCardHeader, IonCardTitle, IonCardSubtitle
+  ],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   url: string = '';
   titulo: string = '';
+  loading: boolean = false;
+  mensajeError: string = '';
 
-  async getMetadata() {
-    // Verificación de seguridad profesional
-    if (!(window as any).__TAURI_INTERNALS__) {
-      this.titulo = "Error: No se detecta el entorno de Tauri. ¿Estás en el navegador?";
-      return;
-    }
+  constructor() {
+    // Registramos los iconos para que Ionic los renderice
+    addIcons({ musicalNotesOutline, videocamOutline, logoYoutube, informationCircleOutline });
+  }
+
+  // Esta es la función que deben llamar tus botones en el HTML
+  async procesarEnlace(tipo: 'audio' | 'video') {
+    if (!this.url) return;
+
+    this.loading = true;
+    this.titulo = '';
+    this.mensajeError = '';
 
     try {
-      this.titulo = await invoke('check_video_url', { url: this.url });
+      // Llamamos a Rust (PMO-6)
+      const resultado = await invoke<string>('check_video_url', { url: this.url });
+      this.titulo = resultado;
+      console.log(`Modo ${tipo} preparado para: ${this.titulo}`);
     } catch (error) {
-      console.error("Error desde Rust:", error);
-      this.titulo = "Error de Rust: " + error;
+      this.mensajeError = error as string;
+    } finally {
+      this.loading = false;
     }
+  }
+
+  limpiarEstado() {
+    this.titulo = '';
+    this.mensajeError = '';
   }
 }

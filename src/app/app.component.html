@@ -1,33 +1,47 @@
 <ion-app>
   <ion-header>
     <ion-toolbar color="primary">
-      <ion-title>TurboTainer - YT Downloader</ion-title>
+      <ion-title>TurboTainer</ion-title>
     </ion-toolbar>
   </ion-header>
 
   <ion-content class="ion-padding">
-    <h2>Bienvenido a la versión Pro</h2>
-    <p>Esta interfaz se adaptará automáticamente a móvil y escritorio.</p>
+    <ion-card>
+      <ion-card-content>
+        <ion-item lines="outline">
+          <ion-label position="stacked">Enlace de YouTube</ion-label>
+          <ion-input [(ngModel)]="url" placeholder="Pega la URL aquí..." (ionInput)="limpiarEstado()">
+          </ion-input>
+        </ion-item>
 
-    <ion-item>
-      <ion-label position="stacked">URL de YouTube</ion-label>
-      <ion-input [(ngModel)]="url" placeholder="https://youtube.com/...">
-      </ion-input>
-    </ion-item>
+        <ion-row class="ion-margin-top">
+          <ion-col size="6">
+            <ion-button expand="block" color="secondary" (click)="procesarEnlace('audio')" [disabled]="!url || loading">
+              <ion-icon slot="start" name="musical-notes-outline"></ion-icon>
+              Solo Audio
+            </ion-button>
+          </ion-col>
+          <ion-col size="6">
+            <ion-button expand="block" color="tertiary" (click)="procesarEnlace('video')" [disabled]="!url || loading">
+              <ion-icon slot="start" name="videocam-outline"></ion-icon>
+              Video MP4
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-card-content>
+    </ion-card>
 
-    <ion-button expand="block" class="ion-margin-top" (click)="getMetadata()">
-      Comprobar URL
-    </ion-button>
-
-    @if (titulo) {
-    <div class="ion-margin-top">
-      <ion-item lines="none">
-        <ion-label>
-          <strong>Video detectado:</strong>
-          <p>{{ titulo }}</p>
-        </ion-label>
-      </ion-item>
+    <div *ngIf="loading" class="ion-text-center ion-padding">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Analizando enlace...</p>
     </div>
-    }
+
+    <ion-item *ngIf="titulo" color="light" class="ion-margin-top">
+      <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+      <ion-label class="ion-text-wrap">
+        <h3>Video detectado:</h3>
+        <p>{{ titulo }}</p>
+      </ion-label>
+    </ion-item>
   </ion-content>
 </ion-app>

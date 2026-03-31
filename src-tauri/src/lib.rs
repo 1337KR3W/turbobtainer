@@ -1,5 +1,4 @@
 use tauri_plugin_shell::ShellExt;
-use tauri::Manager; // Necesario para algunas funciones de AppHandle
 
 #[tauri::command]
 async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, String> {
