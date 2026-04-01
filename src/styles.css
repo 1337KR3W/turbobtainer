@@ -4,17 +4,31 @@
 @import "@ionic/angular/css/typography.css";
 
 :root {
-    /* Marca y Colores */
-    --ion-color-primary: #3880ff;
-    --ion-font-family: 'Inter', Avenir, Helvetica, Arial, sans-serif;
+    /* --- PALETA DE MARCA TURBOTAINER --- */
+    --turbo-black: #000000;
+    --turbo-dark-grey: #121212;
+    --turbo-red-vibrant: #ff3e3e;
+    --turbo-red-dark: #8b0000;
+    --turbo-red-glow: rgba(255, 62, 62, 0.3);
+    --turbo-white: #f6f6f6;
+    --turbo-grey-text: #a0a0a0;
 
-    /* Variables de comportamiento */
+    /* --- MAPEO DE VARIABLES IONIC --- */
+    --ion-color-primary: var(--turbo-black);
+    --ion-color-primary-contrast: var(--turbo-red-vibrant);
+
+    --ion-background-color: var(--turbo-dark-grey);
+    --ion-text-color: var(--turbo-white);
+
+    /* --- CONFIGURACIÓN DE FUENTE Y RENDERIZADO --- */
+    --ion-font-family: 'Inter', Avenir, Helvetica, Arial, sans-serif;
     font-family: var(--ion-font-family);
     font-size: 16px;
     line-height: 24px;
     font-weight: 400;
-    color: #0f0f0f;
-    background-color: #f6f6f6;
+
+    color: var(--ion-text-color);
+    background-color: var(--ion-background-color);
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -22,58 +36,67 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Estilos de elementos globales (Botones e Inputs) */
+/* Estilos de elementos globales (Inputs y Botones nativos) */
 input,
 button {
     border-radius: 8px;
-    border: 1px solid transparent;
+    border: 1px solid var(--turbo-red-dark);
     padding: 0.6em 1.2em;
     font-size: 1em;
     font-weight: 500;
     font-family: inherit;
-    color: #0f0f0f;
-    background-color: #ffffff;
+    /* Colores modo Dark Hacker */
+    color: var(--turbo-white);
+    background-color: var(--turbo-black);
+
     transition: all 0.25s ease;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     outline: none;
 
     &:hover {
-        border-color: #396cd8;
+        border-color: var(--turbo-red-vibrant);
+        box-shadow: 0 0 12px var(--turbo-red-glow);
+        transform: translateY(-1px);
     }
 
     &:active {
-        background-color: #e8e8e8;
+        background-color: var(--turbo-red-dark);
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        border-color: var(--turbo-grey-text);
     }
 }
 
+/* Enlaces personalizados */
 a {
     font-weight: 500;
-    color: #646cff;
+    color: var(--turbo-red-vibrant);
     text-decoration: inherit;
 
     &:hover {
-        color: #535bf2;
+        color: var(--turbo-white);
+        text-shadow: 0 0 5px var(--turbo-red-glow);
     }
 }
 
-/* Modo Oscuro Global */
-@media (prefers-color-scheme: dark) {
-    :root {
-        color: #f6f6f6;
-        background-color: #2f2f2f;
-    }
+/* Scrollbar personalizada para look Dark (opcional pero recomendado) */
+::-webkit-scrollbar {
+    width: 8px;
+}
 
-    input,
-    button {
-        color: #ffffff;
-        background-color: rgba(15, 15, 15, 0.6);
+::-webkit-scrollbar-track {
+    background: var(--turbo-black);
+}
 
-        &:active {
-            background-color: rgba(15, 15, 15, 0.4);
-        }
-    }
+::-webkit-scrollbar-thumb {
+    background: var(--turbo-red-dark);
+    border-radius: 10px;
+}
 
-    a:hover {
-        color: #24c8db;
-    }
+::-webkit-scrollbar-thumb:hover {
+    background: var(--turbo-red-vibrant);
 }
