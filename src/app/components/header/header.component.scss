@@ -1,0 +1,30 @@
+.header-container {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    padding: 4px 0;
+
+    .main-title {
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: var(--turbo-red-vibrant);
+        text-shadow: 0 0 10px var(--turbo-red-glow);
+
+        small {
+            font-size: 0.6em;
+            opacity: 0.8;
+            color: var(--turbo-white);
+            margin-left: 4px;
+            text-shadow: none;
+        }
+    }
+
+    .subtitle {
+        font-size: 0.6rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--turbo-red-dark);
+        margin: 4px 0px 0px 2px;
+    }
+}

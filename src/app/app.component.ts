@@ -20,6 +20,7 @@ import {
   logoYoutube
 } from 'ionicons/icons';
 import { FooterComponent } from './components/footer/footer.component';
+import { Header } from "./components/header/header.component";
 
 @Component({
   selector: 'app-root',
@@ -33,7 +34,8 @@ import { FooterComponent } from './components/footer/footer.component';
     IonCardTitle,
     IonCardSubtitle,
     IonProgressBar,
-    FooterComponent
+    FooterComponent,
+    Header
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
