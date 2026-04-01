@@ -80,6 +80,123 @@ ion-item {
   }
 }
 
+/* Estilo específico para los spinners de carga */
+ion-spinner {
+  /* Ajustamos el tamaño para que se vea más imponente si quieres */
+  width: 28px;
+  height: 28px;
+}
+
+/* Spinner en botón AUDIO (Fondo oscuro -> Puntos Rojos) */
+.spinner-audio {
+  --color: var(--turbo-red-vibrant) !important;
+  filter: drop-shadow(0 0 5px var(--turbo-red-glow));
+}
+
+/* Spinner en botón VIDEO (Fondo Rojo -> Puntos Negros) */
+.spinner-video {
+  --color: var(--turbo-black) !important;
+  opacity: 1;
+}
+
+.input-turbo-logo {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 2px rgba(255, 62, 62, 0.2));
+
+  /* Efecto de resplandor cuando el usuario interactúa con el input */
+  .turbo-input-item.item-has-focus & {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px var(--turbo-red-glow));
+    transform: scale(1.05);
+  }
+}
+
+/* Contenedor del Input */
+.turbo-input-item {
+  --background: var(--turbo-black);
+  --border-radius: 8px;
+  --padding-start: 15px;
+
+  /* --- ESTO MATA EL BORDE ROJO INTERNO --- */
+  --highlight-height: 0;
+  /* Elimina el grosor de la línea */
+  --highlight-color-focused: transparent;
+  /* Hace la línea invisible */
+  --inner-border-width: 0;
+  /* Quita bordes internos extra de Ionic */
+  /* -------------------------------------- */
+
+  border: 1px solid #222;
+  margin: 15px 0;
+  transition: none;
+
+  /* Forzamos que en el foco no cambie nada */
+  &.item-has-focus {
+    border-color: #222;
+    box-shadow: none;
+  }
+
+  &:hover {
+    border-color: #222;
+  }
+}
+
+/* El Input de texto propiamente dicho */
+.custom-input {
+  --color: var(--turbo-white);
+  --placeholder-color: var(--turbo-grey-text);
+  --placeholder-font-weight: 300;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+  text-transform: none;
+}
+
+/* Contenedor de Éxito */
+.success-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Centra horizontalmente */
+  justify-content: center;
+  /* Centra verticalmente si hubiera espacio */
+  text-align: center;
+  /* Centra el texto */
+  padding: 2rem 1.5rem;
+  /* Más aire para que respire el diseño */
+
+  .success-icon {
+    color: var(--turbo-red-vibrant);
+    font-size: 80px;
+    filter: drop-shadow(0 0 15px var(--turbo-red-glow));
+    margin-bottom: 1rem;
+  }
+
+  .success-text {
+    h2 {
+      font-weight: bold;
+      color: var(--turbo-white);
+      margin: 0 0 8px 0;
+      font-size: 1.4rem;
+    }
+
+    p {
+      color: var(--turbo-grey-text);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-bottom: 1.5rem;
+
+      strong {
+        color: var(--turbo-white);
+      }
+    }
+  }
+}
+
 /* Botones de acción (Audio / Video / Descarga) */
 ion-button {
   --border-radius: 8px;
