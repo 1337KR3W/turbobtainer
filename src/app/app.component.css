@@ -228,3 +228,94 @@ ion-button {
   --border-style: solid;
   --border-width: 1px;
 }
+
+.turbo-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(10, 10, 10, 0.95);
+  border-top: 1px solid var(--turbo-red-dark);
+  padding: 10px 20px;
+  backdrop-filter: blur(10px);
+  z-index: 100;
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .bolt {
+      color: var(--turbo-red);
+      font-size: 0.9rem;
+    }
+
+    .name {
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 2px;
+      font-size: 0.75rem;
+    }
+
+    .version {
+      color: #555;
+      font-size: 0.6rem;
+      font-weight: 400;
+    }
+  }
+
+  .status-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px 10px;
+    border-radius: 4px;
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #00ff88;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00ff88;
+      animation: pulse-green 2s infinite;
+    }
+
+    .status-text {
+      color: #888;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+  }
+
+  .copyright {
+    color: #444;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+  }
+}
+
+
+@keyframes pulse-green {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
