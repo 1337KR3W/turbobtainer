@@ -41,7 +41,8 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
     let mut args = vec![
         "--newline",
         "--progress",
-        "--progress-template", "download:%(progress._percent_str)s",
+        // Usamos una etiqueta simple para identificar la línea de progreso
+        "--progress-template", "PROG:%(progress._percent_str)s",
         "--no-playlist",
         "--no-overwrites",
         "--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
@@ -63,28 +64,27 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
 
     tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
-            match event {
-                tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
-                    let out = String::from_utf8_lossy(&line);
-                    if out.contains("download:") {
-                        if let Some(pct_part) = out.split(':').nth(1) {
-                            let clean_pct: String = pct_part.chars()
-                                .filter(|c| c.is_digit(10) || *c == '.')
-                                .collect();
-                            if let Ok(pct_f) = clean_pct.parse::<f32>() {
-                                // Enviamos el progreso real
-                                let _ = app.emit("download-progress", pct_f / 100.0);
-                            }
+            if let tauri_plugin_shell::process::CommandEvent::Stdout(line) = event {
+                let out = String::from_utf8_lossy(&line);
+                
+                // Si la línea contiene nuestro marcador "PROG:"
+                if out.contains("PROG:") {
+                    if let Some(parts) = out.split("PROG:").nth(1) {
+                        // FILTRADO MANUAL: Nos quedamos solo con números y puntos decimales
+                        // Esto elimina símbolos de % y espacios invisibles
+                        let clean_num: String = parts.chars()
+                            .filter(|c| c.is_ascii_digit() || *c == '.')
+                            .collect();
+
+                        if let Ok(pct_f) = clean_num.parse::<f32>() {
+                            // Emitimos el valor (ej. 0.054 para 5.4%)
+                            let _ = app.emit("download-progress", pct_f / 100.0);
                         }
                     }
-                },
-                tauri_plugin_shell::process::CommandEvent::Stderr(line) => {
-                    eprintln!("🔴 YT-DLP LOG: {}", String::from_utf8_lossy(&line));
-                },
-                _ => {}
+                }
             }
         }
-        // CRÍTICO: Emitir 1.0 SOLO cuando el bucle termina (descarga terminada)
+        // Al terminar, forzamos el 100% para cerrar la UI de descarga
         let _ = app.emit("download-progress", 1.0);
     });
 

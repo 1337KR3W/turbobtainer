@@ -89,13 +89,15 @@
       </ion-card-header>
 
       <ion-card-content>
-        <ion-progress-bar [value]="tauriService.state().progreso || 0" color="primary" type="determinate">
+        <ion-progress-bar
+          [type]="tauriService.state().progreso && tauriService.state().progreso! > 0 ? 'determinate' : 'indeterminate'"
+          [value]="tauriService.state().progreso || 0" color="primary">
         </ion-progress-bar>
 
         <div class="ion-margin-top ion-text-center">
           <ion-text color="primary">
-            <h1 style="font-weight: bold;">
-              {{ (tauriService.state().progreso || 0) * 100 | number:'1.0-0' }}%
+            <h1 style="font-weight: bold; margin: 0;">
+              {{ (tauriService.state().progreso || 0) * 100 | number:'1.1-1' }}%
             </h1>
           </ion-text>
         </div>
