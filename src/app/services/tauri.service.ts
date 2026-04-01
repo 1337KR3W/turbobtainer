@@ -10,8 +10,6 @@ export class TauriService implements OnDestroy {
   private readonly _state = signal<AppState>({ status: 'IDLE' });
   public state = this._state.asReadonly();
   private unlistenProgress?: UnlistenFn;
-
-  // 1. VARIABLE NUEVA: Guardamos la URL para usarla en el momento de la descarga
   private urlMemoria: string = '';
 
   constructor() {
@@ -20,13 +18,23 @@ export class TauriService implements OnDestroy {
 
   private async setupListeners() {
     try {
+      // UNIFICADO: Un solo listener con lógica de finalización
       this.unlistenProgress = await listen<number>('download-progress', (event) => {
-        // Actualizamos el progreso con el valor que viene de Rust
-        this._state.update(s => ({
-          ...s,
-          status: 'DOWNLOADING',
-          progreso: event.payload
-        }));
+        const progreso = event.payload;
+
+        if (progreso >= 1.0) {
+          this._state.update(s => ({
+            ...s,
+            status: 'SUCCESS',
+            progreso: 1.0
+          }));
+        } else {
+          this._state.update(s => ({
+            ...s,
+            status: 'DOWNLOADING',
+            progreso: progreso
+          }));
+        }
       });
     } catch (error) {
       console.error('Error al suscribirse a eventos de progreso:', error);
@@ -34,9 +42,7 @@ export class TauriService implements OnDestroy {
   }
 
   async obtenerMetadata(url: string, tipo: 'audio' | 'video') {
-    // 2. GUARDAMOS LA URL: Antes de nada, la ponemos en memoria
     this.urlMemoria = url;
-
     this._state.set({ status: 'ANALYZING', tipoSeleccionado: tipo });
 
     try {
@@ -44,7 +50,8 @@ export class TauriService implements OnDestroy {
       this._state.set({
         status: 'READY',
         videoTitle: titulo,
-        tipoSeleccionado: tipo
+        tipoSeleccionado: tipo,
+        progreso: 0
       });
     } catch (error) {
       this._state.set({
@@ -61,7 +68,6 @@ export class TauriService implements OnDestroy {
     this._state.update(s => ({ ...s, status: 'DOWNLOADING', progreso: 0 }));
 
     try {
-      // 3. CAMBIO CRÍTICO: Enviamos 'this.urlMemoria' en lugar de 'actual.videoTitle'
       await invoke('download_video', {
         url: this.urlMemoria,
         tipo: actual.tipoSeleccionado
@@ -72,7 +78,7 @@ export class TauriService implements OnDestroy {
   }
 
   reset() {
-    this.urlMemoria = ''; // Limpiamos la memoria al resetear
+    this.urlMemoria = '';
     this._state.set({ status: 'IDLE' });
   }
 

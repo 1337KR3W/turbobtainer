@@ -100,6 +100,21 @@
     </ion-card>
     }
 
+    @else if (tauriService.state().status === 'SUCCESS') {
+    <ion-card>
+      <div class="ion-padding ion-text-center">
+        <ion-icon name="checkmark-circle" color="success" style="font-size: 64px;"></ion-icon>
+        <h2 style="font-weight: bold; margin-top: 10px;">¡Descarga Completada!</h2>
+        <p>Tu archivo se ha guardado correctamente en la carpeta de <strong>Descargas</strong>.</p>
+
+        <ion-button expand="block" color="primary" class="ion-margin-top" (click)="cancelar(); url = ''">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Descargar otro video
+        </ion-button>
+      </div>
+    </ion-card>
+    }
+
     @else if (tauriService.state().status === 'ERROR') {
     <ion-card color="danger">
       <ion-item lines="none" color="danger">
