@@ -27,8 +27,8 @@
 
         <ion-row class="ion-margin-top">
           <ion-col size="6">
-            <ion-button expand="block" color="secondary" (click)="analizar('audio')"
-              [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+            <ion-button type="button" expand="block" color="secondary" (click)="analizar('audio')"
+              [disabled]="tauriService.state().status === 'ANALYZING' || !url" (keyup.enter)="analizar('audio')">
               @if (tauriService.state().status === 'ANALYZING') {
               <ion-spinner name="dots"></ion-spinner>
               } @else {
@@ -38,8 +38,8 @@
             </ion-button>
           </ion-col>
           <ion-col size="6">
-            <ion-button expand="block" color="tertiary" (click)="analizar('video')"
-              [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+            <ion-button type="button" expand="block" color="tertiary" (click)="analizar('video')"
+              [disabled]="tauriService.state().status === 'ANALYZING' || !url" (keyup.enter)="analizar('video')">
               @if (tauriService.state().status === 'ANALYZING') {
               <ion-spinner name="dots"></ion-spinner>
               } @else {
@@ -66,12 +66,14 @@
       </ion-item>
 
       <div class="ion-padding">
-        <ion-button expand="block" color="success" (click)="iniciarDescarga()">
+        <ion-button type="button" expand="block" color="success" (click)="iniciarDescarga()"
+          (keyup.enter)="iniciarDescarga()">
           <ion-icon name="cloud-download-outline" slot="start"></ion-icon>
           Comenzar Descarga
         </ion-button>
 
-        <ion-button fill="clear" expand="block" color="medium" (click)="cancelar()">
+        <ion-button type="button" fill="clear" expand="block" color="medium" (click)="cancelar()"
+          (keyup.enter)="cancelar()">
           <ion-icon name="trash-outline" slot="start"></ion-icon>
           Cancelar y volver
         </ion-button>
@@ -98,7 +100,8 @@
           </ion-text>
         </div>
 
-        <ion-button fill="outline" expand="block" color="danger" class="ion-margin-top" (click)="cancelar()">
+        <ion-button type="button" fill="outline" expand="block" color="danger" class="ion-margin-top"
+          (click)="cancelar()" (keyup.enter)="cancelar()">
           Detener
         </ion-button>
       </ion-card-content>
@@ -112,7 +115,8 @@
         <h2 style="font-weight: bold; margin-top: 10px;">¡Descarga Completada!</h2>
         <p>Tu archivo se ha guardado correctamente en la carpeta de <strong>Descargas</strong>.</p>
 
-        <ion-button expand="block" color="primary" class="ion-margin-top" (click)="cancelar(); url = ''">
+        <ion-button type="button" expand="block" color="primary" class="ion-margin-top" (click)="cancelar(); url = ''"
+          (keyup.enter)="cancelar(); url = ''">
           <ion-icon name="refresh-outline" slot="start"></ion-icon>
           Descargar otro video
         </ion-button>
@@ -129,7 +133,8 @@
           <p>{{ tauriService.state().mensaje }}</p>
         </ion-label>
       </ion-item>
-      <ion-button fill="clear" expand="block" color="light" (click)="cancelar()">
+      <ion-button type="button" fill="clear" expand="block" color="light" (click)="cancelar()"
+        (keyup.enter)="cancelar()">
         Intentar con otro enlace
       </ion-button>
     </ion-card>
