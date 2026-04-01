@@ -7,6 +7,6 @@ import { IonHeader, IonToolbar, IonTitle } from "@ionic/angular/standalone";
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
-export class Header {
+export class HeaderComponent {
 
 }
