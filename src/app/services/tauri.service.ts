@@ -18,17 +18,18 @@ export class TauriService implements OnDestroy {
 
   private async setupListeners() {
     try {
-      // UNIFICADO: Un solo listener con lógica de finalización
       this.unlistenProgress = await listen<number>('download-progress', (event) => {
         const progreso = event.payload;
 
-        if (progreso >= 1) {
+        // Solo pasamos a SUCCESS si es exactamente 1.0
+        if (progreso === 1) {
           this._state.update(s => ({
             ...s,
             status: 'SUCCESS',
             progreso: 1
           }));
         } else {
+          // Cualquier otro valor (incluyendo 0.99) mantiene el estado DOWNLOADING
           this._state.update(s => ({
             ...s,
             status: 'DOWNLOADING',
@@ -37,10 +38,9 @@ export class TauriService implements OnDestroy {
         }
       });
     } catch (error) {
-      console.error('Error al suscribirse a eventos de progreso:', error);
+      console.error('Error:', error);
     }
   }
-
   async obtenerMetadata(url: string, tipo: 'audio' | 'video') {
     this.urlMemoria = url;
     this._state.set({ status: 'ANALYZING', tipoSeleccionado: tipo });

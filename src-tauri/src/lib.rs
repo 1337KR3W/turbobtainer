@@ -101,30 +101,43 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
         .spawn()
         .map_err(|e| format!("Process error: {}", e))?;
 
-    tauri::async_runtime::spawn(async move {
-        while let Some(event) = rx.recv().await {
-            match event {
-                tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
-                    let out = String::from_utf8_lossy(&line);
-                    if out.contains("PROG:") {
-                        if let Some(parts) = out.split("PROG:").nth(1) {
-                            let clean_num: String = parts.chars()
-                                .filter(|c| c.is_ascii_digit() || *c == '.')
-                                .collect();
-                            if let Ok(pct_f) = clean_num.parse::<f32>() {
-                                let _ = app.emit("download-progress", pct_f / 100.0);
+        tauri::async_runtime::spawn(async move {
+                while let Some(event) = rx.recv().await {
+                    match event {
+                        tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
+                            let out = String::from_utf8_lossy(&line);
+                            if out.contains("PROG:") {
+                                if let Some(parts) = out.split("PROG:").nth(1) {
+                                    let clean_num: String = parts.chars()
+                                        .filter(|c| c.is_ascii_digit() || *c == '.')
+                                        .collect();
+                                    if let Ok(pct_f) = clean_num.parse::<f32>() {
+                                        let val = pct_f / 100.0;
+                                        // Enviamos el progreso, pero limitamos a 0.99 
+                                        // para que el SUCCESS solo ocurra al final real del proceso
+                                        if val < 1.0 {
+                                            let _ = app.emit("download-progress", val);
+                                        } else {
+                                            // Si es 1.0 por descarga, enviamos 0.99 para indicar "procesando/convirtiendo"
+                                            let _ = app.emit("download-progress", 0.99);
+                                        }
+                                    }
+                                }
                             }
-                        }
+                        },
+                        tauri_plugin_shell::process::CommandEvent::Stderr(line) => {
+                            println!("YT-DLP Log: {}", String::from_utf8_lossy(&line));
+                        },
+                        // El evento Terminated indica que yt-dlp CERRÓ (terminó de convertir y borrar temporales)
+                        tauri_plugin_shell::process::CommandEvent::Terminated(payload) => {
+                            if payload.code == Some(0) {
+                                let _ = app.emit("download-progress", 1.0);
+                            }
+                        },
+                        _ => {}
                     }
-                },
-                tauri_plugin_shell::process::CommandEvent::Stderr(line) => {
-                    println!("YT-DLP Log: {}", String::from_utf8_lossy(&line));
-                },
-                _ => {}
-            }
-        }
-        let _ = app.emit("download-progress", 1.0);
-    });
+                }
+            });
 
     Ok("Download process initiated".into())
 }
