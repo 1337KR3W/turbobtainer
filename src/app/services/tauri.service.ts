@@ -22,11 +22,11 @@ export class TauriService implements OnDestroy {
       this.unlistenProgress = await listen<number>('download-progress', (event) => {
         const progreso = event.payload;
 
-        if (progreso >= 1.0) {
+        if (progreso >= 1) {
           this._state.update(s => ({
             ...s,
             status: 'SUCCESS',
-            progreso: 1.0
+            progreso: 1
           }));
         } else {
           this._state.update(s => ({
