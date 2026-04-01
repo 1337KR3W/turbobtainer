@@ -107,7 +107,7 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
                         tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
                             let out = String::from_utf8_lossy(&line);
                             if out.contains("PROG:") {
-                                if let Some(parts) = out.split("PROG:").nth(1) {
+                                    if let Some(parts) = out.split("PROG:").nth(1) {
                                     let clean_num: String = parts.chars()
                                         .filter(|c| c.is_ascii_digit() || *c == '.')
                                         .collect();
