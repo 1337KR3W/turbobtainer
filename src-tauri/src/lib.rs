@@ -8,7 +8,7 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, S
     }
 
     let sidecar = app.shell().sidecar("yt-dlp").map_err(|e| {
-        format!("SISTEM_ERROR: Download engine not available. ({})", e)
+        format!("SYSTEM_ERROR: Download engine not available. ({})", e)
     })?;
 
     let output = sidecar
@@ -26,52 +26,46 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, S
         }
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(format!("SISTEM_ERROR: {}", stderr.trim()))
+        Err(format!("SYSTEM_ERROR: {}", stderr.trim()))
     }
 }
 
 #[tauri::command]
 async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Result<String, String> {
+    // 1. RESOLUCIÓN DE RUTA DE FFMPEG
+    let target_triple = tauri::utils::platform::target_triple().unwrap_or_default();
+    let ffmpeg_name = format!("ffmpeg-{}.exe", target_triple);
+    
+    // En desarrollo: buscar en CARGO_MANIFEST_DIR/bin (src-tauri/bin)
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let dev_path = manifest_dir.join("bin").join(&ffmpeg_name);
+    
+    // En producción: buscar junto al ejecutable
+    let exe_path = std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|p| p.to_path_buf()))
+        .map(|dir| dir.join(&ffmpeg_name));
+    
+    let ffmpeg_path = if dev_path.exists() {
+        dev_path
+    } else if let Some(exe_p) = exe_path {
+        if exe_p.exists() {
+            exe_p
+        } else {
+            return Err("FFmpeg not found. Please reinstall the application.".into());
+        }
+    } else {
+        return Err("FFmpeg not found. Please reinstall the application.".into());
+    };
+    
+    let ffmpeg_str = ffmpeg_path.to_string_lossy().to_string();
+
+    // 2. DIRECTORIO DE DESCARGA Y PARÁMETROS
     let download_dir = app.path().download_dir()
         .map_err(|e| format!("Download directory not found: {}", e))?;
     
-    // 1. Detectamos el triple del sistema
-    let target_triple = tauri::utils::platform::target_triple().unwrap_or_default();
-    let ffmpeg_name = if cfg!(windows) {
-        format!("ffmpeg-{}.exe", target_triple)
-    } else {
-        format!("ffmpeg-{}", target_triple)
-    };
-
-    // 2. LÓGICA DE RESOLUCIÓN HÍBRIDA
-    // Intento A: Ruta de recursos oficial (Producción)
-    let mut ffmpeg_exe_path = app.path().resolve(
-        format!("bin/{}", ffmpeg_name), 
-        tauri::path::BaseDirectory::Resource
-    ).unwrap_or_default();
-
-    // Intento B: Ruta local de desarrollo (si el A no existe)
-    if !ffmpeg_exe_path.exists() {
-        if let Ok(current_dir) = std::env::current_dir() {
-            // En desarrollo, 'current_dir' suele ser la raíz de 'src-tauri'
-            let local_path = current_dir.join("bin").join(&ffmpeg_name);
-            if local_path.exists() {
-                ffmpeg_exe_path = local_path;
-            }
-        }
-    }
-
-    let ffmpeg_str = ffmpeg_exe_path.to_string_lossy().to_string();
-
-    // Verificación final antes de lanzar yt-dlp
-    if !ffmpeg_exe_path.exists() {
-        return Err(format!("FFmpeg CRITICAL ERROR: Binaries not found in path: {}", ffmpeg_str));
-    }
-    
-    println!("✅ FFmpeg activo para Turbobtainer en: {}", ffmpeg_str);
-
-    let output_path = download_dir.join("Turbobtainer_%(title).150s_%(epoch)s.%(ext)s");
-    let output_str = output_path.to_string_lossy().to_string();
+    let output_str = download_dir.join("Turbobtainer_%(title).150s_%(epoch)s.%(ext)s")
+        .to_string_lossy().to_string();
 
     let mut args = vec![
         "--newline",
@@ -94,6 +88,7 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
 
     args.push(&url);
 
+    // 3. EJECUCIÓN
     let (mut rx, _child) = app.shell()
         .sidecar("yt-dlp")
         .map_err(|e| format!("Sidecar error: {}", e))?
@@ -101,43 +96,32 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
         .spawn()
         .map_err(|e| format!("Process error: {}", e))?;
 
-        tauri::async_runtime::spawn(async move {
-                while let Some(event) = rx.recv().await {
-                    match event {
-                        tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
-                            let out = String::from_utf8_lossy(&line);
-                            if out.contains("PROG:") {
-                                    if let Some(parts) = out.split("PROG:").nth(1) {
-                                    let clean_num: String = parts.chars()
-                                        .filter(|c| c.is_ascii_digit() || *c == '.')
-                                        .collect();
-                                    if let Ok(pct_f) = clean_num.parse::<f32>() {
-                                        let val = pct_f / 100.0;
-                                        // Enviamos el progreso, pero limitamos a 0.99 
-                                        // para que el SUCCESS solo ocurra al final real del proceso
-                                        if val < 1.0 {
-                                            let _ = app.emit("download-progress", val);
-                                        } else {
-                                            // Si es 1.0 por descarga, enviamos 0.99 para indicar "procesando/convirtiendo"
-                                            let _ = app.emit("download-progress", 0.99);
-                                        }
-                                    }
-                                }
+    tauri::async_runtime::spawn(async move {
+        while let Some(event) = rx.recv().await {
+            match event {
+                tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
+                    let out = String::from_utf8_lossy(&line);
+                    if out.contains("PROG:") {
+                        if let Some(parts) = out.split("PROG:").nth(1) {
+                            let clean_num: String = parts.chars()
+                                .filter(|c| c.is_ascii_digit() || *c == '.')
+                                .collect();
+                            if let Ok(pct_f) = clean_num.parse::<f32>() {
+                                let val = pct_f / 100.0;
+                                let _ = app.emit("download-progress", if val < 1.0 { val } else { 0.99 });
                             }
-                        },
-                        tauri_plugin_shell::process::CommandEvent::Stderr(line) => {
-                            println!("YT-DLP Log: {}", String::from_utf8_lossy(&line));
-                        },
-                        // El evento Terminated indica que yt-dlp CERRÓ (terminó de convertir y borrar temporales)
-                        tauri_plugin_shell::process::CommandEvent::Terminated(payload) => {
-                            if payload.code == Some(0) {
-                                let _ = app.emit("download-progress", 1.0);
-                            }
-                        },
-                        _ => {}
+                        }
                     }
-                }
-            });
+                },
+                tauri_plugin_shell::process::CommandEvent::Terminated(payload) => {
+                    if payload.code == Some(0) {
+                        let _ = app.emit("download-progress", 1.0);
+                    }
+                },
+                _ => {}
+            }
+        }
+    });
 
     Ok("Download process initiated".into())
 }
