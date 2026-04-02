@@ -1,14 +1,17 @@
 <img width="746" height="176" alt="banner" src="https://github.com/user-attachments/assets/12d94fdd-cb1d-4ff1-821e-cd97c24533c0" />
 
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri-24c8db?style=flat-square&logo=tauri)](https://tauri.app/)
+[![Node.js](https://img.shields.io/badge/Runtime-Node.js-339933?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Angular](https://img.shields.io/badge/Frontend-Angular%2017-dd0031?style=flat-square&logo=angular)](https://angular.io/)
+[![Ionic](https://img.shields.io/badge/UI%20Framework-Ionic-3880ff?style=flat-square&logo=ionic)](https://ionicframework.com/)
 [![Rust](https://img.shields.io/badge/Backend-Rust-000000?style=flat-square&logo=rust)](https://www.rust-lang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Engine: yt-dlp](https://img.shields.io/badge/Engine-yt--dlp-red?style=flat-square&logo=youtube)](https://github.com/yt-dlp/yt-dlp)
+[![Muxer: FFmpeg](https://img.shields.io/badge/Muxer-FFmpeg-0078d7?style=flat-square&logo=ffmpeg)](https://ffmpeg.org/)
 
-**Turbobtainer** is a high-performance desktop application designed for seamless multimedia extraction. By bridging the gap between a modern UI and industrial-grade CLI tools, Turbobtainer provides a streamlined experience for downloading video and audio from thousands of platforms.
+Turbobtainer is a high-performance desktop application designed for seamless multimedia extraction. By bridging the gap between a modern UI and industrial-grade CLI tools, Turbobtainer provides a streamlined experience for downloading video and audio specifically from [YouTube](https://www.youtube.com/), powered by the industry-standard [yt-dlp](https://github.com/yt-dlp/yt-dlp) engine and the versatile [FFmpeg](https://www.ffmpeg.org/) multimedia framework.
 
-# Índice
-  - [Table of Contents](#Table-of-Contents)
+# Content
+  
   - [Latest Release](#Latest-Release)
   - [Technology Stack](#Technology-Stack)
     - [**Core Architecture**](#Core-Architecture)
@@ -127,4 +130,6 @@ Are not responsible for any misuse of this tool or copyright infringement commit
 Provide this software "as is," without warranty of any kind.
 By using this software, you agree to comply with all applicable local and international laws.
 
-Created with ❤️ by 1337KR3W.
+Turbobtainer by 1337KR3W.
+
+---
