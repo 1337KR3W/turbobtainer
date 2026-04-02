@@ -70,7 +70,7 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
     
     println!("✅ FFmpeg activo para Turbobtainer en: {}", ffmpeg_str);
 
-    let output_path = download_dir.join("TurboTainer_%(title).150s_%(epoch)s.%(ext)s");
+    let output_path = download_dir.join("Turbobtainer_%(title).150s_%(epoch)s.%(ext)s");
     let output_str = output_path.to_string_lossy().to_string();
 
     let mut args = vec![

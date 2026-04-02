@@ -1,5 +1,5 @@
 @if (tauriService.state().status === 'IDLE' || tauriService.state().status === 'ANALYZING') {
-<ion-card>
+<ion-card class="turbo-card-container">
     <ion-card-header>
         <ion-card-title>It doesn't just obtain videos; it Turbobtains them</ion-card-title>
     </ion-card-header>
@@ -15,10 +15,10 @@
         <ion-row class="ion-margin-top">
             <ion-col size="6">
                 <ion-button expand="block" class="btn-secondary" (click)="onAnalizar.emit('audio')"
-                    [disabled]="tauriService.state().status === 'ANALYZING' || !url" type="button"
-                    (keyup.enter)="onAnalizar.emit('audio')">
-                    @if (tauriService.state().status === 'ANALYZING') {
-                    <ion-spinner name="dots" color="spinner-audio"></ion-spinner>
+                    [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+                    @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
+                    'audio') {
+                    <ion-spinner name="dots" class="spinner-audio"></ion-spinner>
                     } @else {
                     <ion-icon name="musical-notes-outline" slot="start"></ion-icon>
                     Audio
@@ -27,10 +27,10 @@
             </ion-col>
             <ion-col size="6">
                 <ion-button expand="block" class="btn-primary" (click)="onAnalizar.emit('video')"
-                    [disabled]="tauriService.state().status === 'ANALYZING' || !url" type="button"
-                    (keyup.enter)="onAnalizar.emit('video')">
-                    @if (tauriService.state().status === 'ANALYZING') {
-                    <ion-spinner name="dots" color="spinner-video"></ion-spinner>
+                    [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+                    @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
+                    'video') {
+                    <ion-spinner name="dots" class="spinner-video"></ion-spinner>
                     } @else {
                     <ion-icon name="videocam-outline" slot="start"></ion-icon>
                     Video
@@ -43,7 +43,7 @@
 }
 
 @else if (tauriService.state().status === 'READY') {
-<ion-card>
+<ion-card class="turbo-card-container">
     <ion-item lines="none">
         <ion-icon name="checkmark-done-outline" slot="start" style="color: var(--turbo-red-vibrant)"></ion-icon>
         <ion-label class="ion-text-wrap">
@@ -58,14 +58,12 @@
     </ion-item>
 
     <div class="ion-padding">
-        <ion-button expand="block" class="btn-primary" (click)="onDownload.emit()" type="button"
-            (keyup.enter)="onDownload.emit()">
+        <ion-button expand="block" class="btn-primary" (click)="onDownload.emit()">
             <ion-icon name="cloud-download-outline" slot="start"></ion-icon>
             Download
         </ion-button>
 
-        <ion-button fill="clear" expand="block" style="--color: var(--turbo-grey-text)" (click)="onCancel.emit()"
-            type="button" (keyup.enter)="onCancel.emit()">
+        <ion-button fill="clear" expand="block" style="--color: var(--turbo-grey-text)" (click)="onCancel.emit()">
             <ion-icon name="trash-outline" slot="start"></ion-icon>
             Cancel
         </ion-button>
@@ -74,7 +72,7 @@
 }
 
 @else if (tauriService.state().status === 'DOWNLOADING') {
-<ion-card>
+<ion-card class="turbo-card-container">
     <ion-card-header>
         <ion-card-title>Downloading {{ tauriService.state().tipoSeleccionado }}...</ion-card-title>
         <ion-card-subtitle>{{ tauriService.state().videoTitle }}</ion-card-subtitle>
@@ -94,7 +92,7 @@
 
         <ion-button fill="outline" expand="block"
             style="--color: var(--turbo-red-vibrant); --border-color: var(--turbo-red-dark);" class="ion-margin-top"
-            (click)="onCancel.emit()" type="button" (keyup.enter)="onCancel.emit()">
+            (click)="onCancel.emit()">
             Stop
         </ion-button>
     </ion-card-content>
@@ -102,7 +100,7 @@
 }
 
 @else if (tauriService.state().status === 'SUCCESS') {
-<ion-card>
+<ion-card class="turbo-card-container">
     <div class="ion-padding success-container">
         <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
 
@@ -111,8 +109,7 @@
             <p>The file is in your <strong>Downloads</strong> folder.</p>
         </div>
 
-        <ion-button expand="block" class="btn-primary ion-margin-top" (click)="onCancel.emit()" type="button"
-            (keyup.enter)="onCancel.emit()">
+        <ion-button expand="block" class="btn-primary ion-margin-top" (click)="onCancel.emit()">
             <ion-icon name="refresh-outline" slot="start"></ion-icon>
             New download
         </ion-button>
@@ -121,7 +118,7 @@
 }
 
 @else if (tauriService.state().status === 'ERROR') {
-<ion-card style="border: 1px solid var(--turbo-red-dark)">
+<ion-card class="turbo-card-container" style="border: 1px solid var(--turbo-red-dark)">
     <ion-item lines="none">
         <ion-icon name="alert-circle-outline" slot="start" style="color: var(--turbo-red-vibrant)"></ion-icon>
         <ion-label class="ion-text-wrap">
@@ -129,8 +126,7 @@
             <p style="color: var(--turbo-white)">{{ tauriService.state().mensaje }}</p>
         </ion-label>
     </ion-item>
-    <ion-button fill="clear" expand="block" style="--color: var(--turbo-white)" (click)="onCancel.emit()" type="button"
-        (keyup.enter)="onCancel.emit()">
+    <ion-button fill="clear" expand="block" style="--color: var(--turbo-white)" (click)="onCancel.emit()">
         Retry
     </ion-button>
 </ion-card>

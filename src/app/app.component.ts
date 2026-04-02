@@ -31,10 +31,9 @@ import { DownloadManagerComponent } from "./components/download-manager/download
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  // Inyectamos el servicio para acceder a su estado (state)
+
   public tauriService = inject(TauriService);
 
-  // La URL es lo único que mantenemos local porque pertenece al formulario activo
   url: string = '';
 
   constructor() {
@@ -62,8 +61,8 @@ export class AppComponent {
    * Acción para resetear y volver al inicio
    */
   cancelar() {
-    this.url = ''; // Limpiamos el input
-    this.tauriService.reset(); // Movemos el estado a 'IDLE'
+    this.url = '';
+    this.tauriService.reset();
   }
   iniciarDescarga() {
     this.tauriService.iniciarDescarga();
