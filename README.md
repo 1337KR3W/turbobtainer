@@ -1,20 +1,30 @@
-# 🚀 Turbobtainer
+<img width="746" height="176" alt="banner" src="https://github.com/user-attachments/assets/12d94fdd-cb1d-4ff1-821e-cd97c24533c0" />
 
-It doesnt just obtain videos; it Turbobtains them.
+[![Tauri](https://img.shields.io/badge/built%20with-Tauri-24c8db?style=flat-square&logo=tauri)](https://tauri.app/)
+[![Angular](https://img.shields.io/badge/Frontend-Angular%2017-dd0031?style=flat-square&logo=angular)](https://angular.io/)
+[![Rust](https://img.shields.io/badge/Backend-Rust-000000?style=flat-square&logo=rust)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
 **Turbobtainer** is a high-performance desktop application designed for seamless multimedia extraction. By bridging the gap between a modern UI and industrial-grade CLI tools, Turbobtainer provides a streamlined experience for downloading video and audio from thousands of platforms.
 
-## 📋 Table of Contents
-1. [Latest Release](#-latest-release)
-2. [Technology Stack](#-technology-stack)
-3. [How It Works (Sidecar Pattern)](#-how-it-works-the-sidecar-pattern)
-4. [Getting Started](#-getting-started)
-5. [Project Structure](#-project-structure)
-6. [Disclaimer](#-disclaimer)
-
+# Índice
+  - [Table of Contents](#Table-of-Contents)
+  - [Latest Release](#Latest-Release)
+  - [Technology Stack](#Technology-Stack)
+    - [**Core Architecture**](#Core-Architecture)
+    - [**Frontend**](#Frontend)
+    - [**Development Environment**](#Development-Environment)
+    - [**Engines & Sidecars**](#Engines--Sidecars)
+    - [**Deployment & Distribution**](#Deployment--Distribution)
+  - [How It Works (The Sidecar Pattern)](#How-It-Works-The-Sidecar-Pattern)
+  - [Getting Started](#Getting-Started)
+    - [**Prerequisites**](#Prerequisites)
+    - [**Setup & Installation**](#Setup--Installation)
+  - [Project Structure](#Project-Structure)
+  - [Disclaimer](#Disclaimer)
 ---
 
-## 📦 Latest Release
+## Latest Release
 
 | File | Description |
 | :--- | :--- |
@@ -22,12 +32,7 @@ It doesnt just obtain videos; it Turbobtains them.
 
 ---
 
-[![Powered by Tauri](https://img.shields.io/badge/built%20with-Tauri-24c8db?style=flat-square&logo=tauri)](https://tauri.app/)
-[![Angular](https://img.shields.io/badge/Frontend-Angular%2017-dd0031?style=flat-square&logo=angular)](https://angular.io/)
-[![Rust](https://img.shields.io/badge/Backend-Rust-000000?style=flat-square&logo=rust)](https://www.rust-lang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-
-## 🛠️ Technology Stack
+## Technology Stack
 
 Turbobtainer leverages a robust "Deep Tech" stack to ensure memory safety, speed, and a native look-and-feel.
 
@@ -41,7 +46,7 @@ Turbobtainer leverages a robust "Deep Tech" stack to ensure memory safety, speed
 
 ### **Development Environment**
 * **[Node.js](https://nodejs.org/):** Runtime for the frontend build pipeline.
-* **[nvm (Node Version Manager)](https://github.com/nvm-sh/nvm):** Used for managing environment-specific Node versions to ensure build consistency.
+* **[nvm (Node Version Manager)](https://github.com/nvm-sh/nvm):** Recommended for managing environment-specific Node versions.
 
 ### **Engines & Sidecars**
 * **[yt-dlp](https://github.com/yt-dlp/yt-dlp):** A feature-rich command-line audio/video downloader.
@@ -53,16 +58,17 @@ Turbobtainer leverages a robust "Deep Tech" stack to ensure memory safety, speed
 
 ---
 
-## 🏗️ How It Works (The Sidecar Pattern)
+## How It Works (The Sidecar Pattern)
 
 Turbobtainer uses a **Sidecar Pattern** to execute external binaries without requiring manual installation from the user:
+
 1.  **Detection:** On startup, the Rust backend detects the system's `target-triple`.
 2.  **Resolution:** It dynamically locates the bundled binaries (`yt-dlp` and `ffmpeg`) within the application's internal resource directory.
 3.  **Execution:** When a download starts, Rust spawns these binaries as child processes, piping real-time progress data back to the Angular frontend via Tauri Events.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### **Prerequisites**
 * **Rust:** [Install Rustup](https://rustup.rs/)
@@ -99,7 +105,7 @@ Turbobtainer uses a **Sidecar Pattern** to execute external binaries without req
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 turbobtainer/
@@ -110,3 +116,15 @@ turbobtainer/
 │   ├── capabilities/   # Security and permission definitions
 │   └── tauri.conf.json # Build and bundle configuration
 └── README.md
+```
+
+## Disclaimer
+
+Turbobtainer is intended for personal use only.
+Downloading copyrighted material without permission is a violation of the Terms of Service of most platforms and may be illegal in your jurisdiction. The developers of Turbobtainer:
+Do not encourage or condone the unauthorized downloading of copyrighted content.
+Are not responsible for any misuse of this tool or copyright infringement committed by the user.
+Provide this software "as is," without warranty of any kind.
+By using this software, you agree to comply with all applicable local and international laws.
+
+Created with ❤️ by 1337KR3W.
