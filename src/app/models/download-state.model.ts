@@ -6,6 +6,7 @@ export interface AppState {
     videoTitle?: string;
     thumbnailUrl?: string;
     duration?: string;
+    size?: string;
     tipoSeleccionado?: 'audio' | 'video';
     progreso?: number;
 }

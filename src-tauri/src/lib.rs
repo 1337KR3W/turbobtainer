@@ -7,7 +7,8 @@ use tauri::{Emitter, Manager};
 struct VideoMetadata {
     title: String,
     thumbnail: String,
-    duration: String
+    duration: String,
+    size: String
 }
 
 #[tauri::command]
@@ -22,45 +23,44 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMeta
 
     // Pedimos título y miniatura (separados por un salto de línea en la salida)
     let output = sidecar
-        .args(["--get-title", 
-        "--get-thumbnail",
-        "--get-duration", 
-        "--no-playlist", 
-        "--skip-download", 
-        &url])
+        .args([
+            "--quiet",
+            "--no-warnings",
+            "--no-playlist",
+            "--skip-download",
+            // Construimos un JSON manual muy ligero
+            "--print", "{\"title\":%(title)j, \"thumbnail\":%(thumbnail)j, \"duration\":%(duration_string)j, \"size\":%(filesize,filesize_approx)j}",
+            &url
+        ])
         .output()
         .await
         .map_err(|e| format!("EXECUTION_ERROR: Could not initiate analysis. ({})", e))?;
 
-    if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let lines: Vec<&str> = stdout.lines()
-        .map(|s| s.trim())
-        .filter(|s| !s.is_empty())
-        .collect();
-        println!("Lineas capturadas: {:?}", lines);
-        
-        if lines.len() >= 3 {
+        if output.status.success() {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            
+            // Tomamos solo la primera línea que contiene nuestro JSON
+            let json_line = stdout.lines().next().unwrap_or("{}");
+            
+            // Intentamos parsear el JSON generado por yt-dlp
+            let v: serde_json::Value = serde_json::from_str(json_line).map_err(|e| {
+                format!("JSON_PARSE_ERROR: {}. Raw: {}", e, json_line)
+            })?;
+    
+            // Extraemos los campos de forma segura
             Ok(VideoMetadata {
-                title: lines[0].trim().to_string(),
-                thumbnail: lines[1].trim().to_string(),
-                duration: lines[2].trim().to_string(),
-            })
-        } else if lines.len() == 1 {
-             // Caso borde por si falla la miniatura pero tenemos título
-             Ok(VideoMetadata {
-                title: lines[0].trim().to_string(),
-                thumbnail: "".into(),
-                duration: "".into(),
+                // .as_str() maneja las comillas automáticamente
+                title: v["title"].as_str().unwrap_or("Unknown Title").to_string(),
+                thumbnail: v["thumbnail"].as_str().unwrap_or("").to_string(),
+                duration: v["duration"].as_str().unwrap_or("00:00").to_string(),
+                // El tamaño puede ser número o string, lo pasamos a string para el frontend
+                size: v["size"].to_string(), 
             })
         } else {
-            Err("CONTENT_ERROR: Could not extract metadata.".into())
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            Err(format!("SYSTEM_ERROR: {}", stderr.trim()))
         }
-    } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(format!("SYSTEM_ERROR: {}", stderr.trim()))
     }
-}
 
 #[tauri::command]
 async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Result<String, String> {
