@@ -6,16 +6,12 @@
 
 /* --- CONTENEDOR BASE --- */
 .turbo-card-container {
-
-    --background: rgba(0, 0, 0, 0.85) !important;
-    backdrop-filter: blur(4px);
+    --background: var(--turbo-black);
     --color: var(--turbo-white);
     border-radius: 12px;
-    border: 1px solid rgba(255, 62, 62, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    border: 1px solid #1a1a1a;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     margin: 20px 0;
-    position: relative;
-    z-index: 10;
 
     ion-item {
         --background: transparent;
@@ -105,14 +101,14 @@
             .label-prefix {
                 color: var(--turbo-grey-text);
                 font-size: 0.8rem;
-                display: inline;
+                display: inline; // Forzamos que sea línea
             }
 
             .highlight-title {
                 color: var(--turbo-white);
                 font-weight: bold;
                 font-size: 0.95rem;
-                display: inline;
+                display: inline; // Para que pegue al prefijo "Title: "
                 margin-left: 4px;
             }
         }
@@ -164,6 +160,7 @@ ion-button {
     }
 
     &.cancel-btn {
+        /* FIX: Forzamos el color del texto para que no sea negro sobre negro */
         --color: var(--turbo-grey-text) !important;
         font-weight: normal;
         font-size: 0.85rem;
@@ -195,9 +192,12 @@ ion-progress-bar {
     border-radius: 4px;
     margin: 15px 0;
 
+    // 1. Forzamos el color del progreso (la carga) a rojo
     --progress-background: var(--turbo-red-vibrant);
 
+    // 2. Estilizamos las partes internas (Shadow DOM)
     &::part(track) {
+        // El fondo de la barra (el "camino" azul)
         background: #001a33;
     }
 

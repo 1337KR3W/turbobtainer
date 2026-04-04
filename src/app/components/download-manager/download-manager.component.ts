@@ -2,14 +2,14 @@ import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TauriService } from '../../services/tauri.service';
-import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonIcon, IonInput, IonItem, IonProgressBar, IonRow, IonSpinner, IonLabel } from '@ionic/angular/standalone';
+import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonIcon, IonInput, IonItem, IonProgressBar, IonRow, IonSpinner, IonText, IonLabel } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-download-manager',
   standalone: true,
   imports: [CommonModule, FormsModule, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonItem, IonInput, IonButton, IonIcon, IonRow, IonCol,
-    IonSpinner, IonProgressBar, IonCardSubtitle, IonLabel],
+    IonSpinner, IonProgressBar, IonText, IonCardSubtitle, IonLabel],
   templateUrl: './download-manager.component.html',
   styleUrls: ['./download-manager.component.scss']
 })
