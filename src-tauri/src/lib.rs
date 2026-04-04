@@ -7,6 +7,7 @@ use tauri::{Emitter, Manager};
 struct VideoMetadata {
     title: String,
     thumbnail: String,
+    duration: String
 }
 
 #[tauri::command]
@@ -22,7 +23,8 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMeta
     // Pedimos título y miniatura (separados por un salto de línea en la salida)
     let output = sidecar
         .args(["--get-title", 
-        "--get-thumbnail", 
+        "--get-thumbnail",
+        "--get-duration", 
         "--no-playlist", 
         "--skip-download", 
         &url])
@@ -38,16 +40,18 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMeta
         .collect();
         println!("Lineas capturadas: {:?}", lines);
         
-        if lines.len() >= 2 {
+        if lines.len() >= 3 {
             Ok(VideoMetadata {
                 title: lines[0].trim().to_string(),
                 thumbnail: lines[1].trim().to_string(),
+                duration: lines[2].trim().to_string(),
             })
         } else if lines.len() == 1 {
              // Caso borde por si falla la miniatura pero tenemos título
              Ok(VideoMetadata {
                 title: lines[0].trim().to_string(),
                 thumbnail: "".into(),
+                duration: "".into(),
             })
         } else {
             Err("CONTENT_ERROR: Could not extract metadata.".into())

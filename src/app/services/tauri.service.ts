@@ -48,12 +48,13 @@ export class TauriService implements OnDestroy {
 
     try {
 
-      const data = await invoke<{ title: string, thumbnail: string }>('check_video_url', { url });
+      const data = await invoke<{ title: string, thumbnail: string, duration: string }>('check_video_url', { url });
       console.log('Datos recibidos de Rust:', data); // <-- Añade este log para depurar
       this._state.set({
         status: 'READY',
         videoTitle: data.title,
         thumbnailUrl: data.thumbnail,
+        duration: data.duration,
         tipoSeleccionado: tipo,
         progreso: 0
       });

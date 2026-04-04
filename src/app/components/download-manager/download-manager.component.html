@@ -55,9 +55,20 @@
                 <span class="label-prefix">Title: </span>
                 <span class="highlight-title">{{ tauriService.state().videoTitle }}</span>
             </div>
+            @if (tauriService.state().tipoSeleccionado === 'audio') {
 
             <p class="format-text">Format:
-                <span class="highlight">{{ tauriService.state().tipoSeleccionado | uppercase }}</span>
+                <span class="highlight">{{ tauriService.state().tipoSeleccionado | uppercase }} (.mp3)</span>
+            </p>
+            }@else {
+            <p class="format-text">Format:
+                <span class="highlight">{{ tauriService.state().tipoSeleccionado | uppercase }} (.mp4)</span>
+            </p>
+            }
+
+
+            <p class="format-text">Duration:
+                <span class="highlight">{{ tauriService.state().duration || '00:00' }}</span>
             </p>
         </ion-label>
     </ion-item>
