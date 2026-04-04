@@ -12,6 +12,7 @@ export class TauriService implements OnDestroy {
   private unlistenProgress?: UnlistenFn;
   private urlMemoria: string = '';
 
+
   constructor() {
     this.setupListeners();
   }
@@ -46,10 +47,13 @@ export class TauriService implements OnDestroy {
     this._state.set({ status: 'ANALYZING', tipoSeleccionado: tipo });
 
     try {
-      const titulo = await invoke<string>('check_video_url', { url });
+
+      const data = await invoke<{ title: string, thumbnail: string }>('check_video_url', { url });
+      console.log('Datos recibidos de Rust:', data); // <-- Añade este log para depurar
       this._state.set({
         status: 'READY',
-        videoTitle: titulo,
+        videoTitle: data.title,
+        thumbnailUrl: data.thumbnail,
         tipoSeleccionado: tipo,
         progreso: 0
       });

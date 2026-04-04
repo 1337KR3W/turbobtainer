@@ -4,6 +4,7 @@ export interface AppState {
     status: DownloadStatus;
     mensaje?: string;
     videoTitle?: string;
+    thumbnailUrl?: string;
     tipoSeleccionado?: 'audio' | 'video';
     progreso?: number;
 }

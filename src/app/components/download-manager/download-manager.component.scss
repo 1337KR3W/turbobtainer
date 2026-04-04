@@ -1,11 +1,10 @@
-/* Asegurar que el componente sea visible */
 :host {
     display: block;
     width: 100%;
     min-height: 200px;
-    /* Evita que colapse a 0px */
 }
 
+/* --- CONTENEDOR BASE --- */
 .turbo-card-container {
     --background: var(--turbo-black);
     --color: var(--turbo-white);
@@ -13,8 +12,6 @@
     border: 1px solid #1a1a1a;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     margin: 20px 0;
-    display: block !important;
-    /* Forzar visibilidad */
 
     ion-item {
         --background: transparent;
@@ -37,48 +34,16 @@
     }
 }
 
-/*Estilo de las Tarjetas (Cards) */
-ion-card {
-    --background: var(--turbo-black);
-    --color: var(--turbo-white);
-    border-radius: 12px;
-    border: 1px solid #1a1a1a;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    margin: 20px 0;
-
-    ion-item {
-        --background: transparent;
-        --color: var(--turbo-white);
-        --border-color: transparent;
-    }
-
-    ion-card-title {
-        color: var(--turbo-red-dark) !important;
-        font-size: 0.65rem !important;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        opacity: 0.8;
-        text-align: center;
-    }
-
-    ion-card-subtitle {
-        color: var(--turbo-grey-text);
-    }
-}
-
-/*Contenedor del Input Especial */
+/* --- INPUT SECCIÓN --- */
 .turbo-input-item {
     --background: var(--turbo-black);
     --border-radius: 8px;
     --padding-start: 15px;
     --highlight-height: 0;
-    --highlight-color-focused: transparent;
-    --inner-border-width: 0;
 
     border: 1px solid #222;
     margin: 15px 0;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease;
 
     &.item-has-focus {
         border-color: var(--turbo-red-dark);
@@ -89,103 +54,139 @@ ion-card {
         height: 24px;
         margin-right: 12px;
         opacity: 0.7;
-        filter: drop-shadow(0 0 2px rgba(255, 62, 62, 0.2));
     }
 }
 
-/*El Input de texto */
 .custom-input {
-    --color: var(--turbo-white);
-    --placeholder-color: var(--turbo-grey-text);
-    --placeholder-font-weight: 300;
     font-family: 'Courier New', Courier, monospace;
     letter-spacing: 1px;
     font-size: 0.9rem;
 }
 
-/*Spinners de carga dinámicos */
-ion-spinner {
-    width: 28px;
-    height: 28px;
-}
+/* --- ESTADO: READY (MINIATURA) --- */
+.ready-item {
+    --padding-start: 10px;
+    margin: 10px 0;
 
-.spinner-audio {
-    --color: var(--turbo-red-vibrant) !important;
-    filter: drop-shadow(0 0 5px var(--turbo-red-glow));
-}
-
-.spinner-video {
-    --color: var(--turbo-black) !important;
-}
-
-/*Botones con estética Turbo */
-ion-button {
-    --border-radius: 8px;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-    margin-top: 10px;
-
-    &::part(native) {
-        transition: all 0.3s ease;
+    .thumbnail-slot {
+        width: 54px;
+        height: 54px;
+        margin-right: 12px;
+        flex-shrink: 0;
     }
 
-    &:hover {
-        filter: brightness(1.2);
-        box-shadow: 0 0 15px var(--turbo-red-glow);
-    }
-}
-
-.btn-primary {
-    --background: var(--turbo-red-vibrant);
-    --color: var(--turbo-black);
-}
-
-.btn-secondary {
-    --background: var(--turbo-dark-grey);
-    --color: var(--turbo-red-vibrant);
-    --border-color: var(--turbo-red-vibrant);
-    --border-style: solid;
-    --border-width: 1px;
-}
-
-/*Pantalla de Éxito (Success) */
-.success-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2rem 1.5rem;
-
-    .success-icon {
-        color: var(--turbo-red-vibrant);
-        font-size: 80px;
-        filter: drop-shadow(0 0 15px var(--turbo-red-glow));
-        margin-bottom: 1rem;
+    .compact-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid var(--turbo-red-dark);
     }
 
-    .success-text {
-        h2 {
-            font-weight: bold;
-            color: var(--turbo-white);
-            margin: 0 0 8px 0;
-            font-size: 1.4rem;
+    .video-info-label {
+        margin-left: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .video-title-container {
+            margin: 0 !important;
+            line-height: 1.3;
+            // Aplicamos el truncado al contenedor entero
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            .label-prefix {
+                color: var(--turbo-grey-text);
+                font-size: 0.8rem;
+                display: inline; // Forzamos que sea línea
+            }
+
+            .highlight-title {
+                color: var(--turbo-white);
+                font-weight: bold;
+                font-size: 0.95rem;
+                display: inline; // Para que pegue al prefijo "Title: "
+                margin-left: 4px;
+            }
         }
 
-        p {
+        .format-text {
+            font-size: 0.8rem;
             color: var(--turbo-grey-text);
-            font-size: 0.9rem;
+            margin: 0;
 
-            strong {
-                color: var(--turbo-white);
+            .highlight {
+                color: var(--turbo-red-vibrant);
+                font-weight: bold;
+                margin-left: 4px;
             }
         }
     }
 }
 
-/*Barra de Progreso */
+/* --- BOTONES Y SPINNERS --- */
+ion-spinner {
+    width: 28px;
+    height: 28px;
+
+    &.spinner-audio {
+        --color: var(--turbo-red-vibrant) !important;
+    }
+
+    &.spinner-video {
+        --color: var(--turbo-black) !important;
+    }
+}
+
+ion-button {
+    --border-radius: 8px;
+    font-weight: bold;
+    margin-top: 10px;
+
+    &.btn-primary {
+        --background: var(--turbo-red-vibrant);
+        --color: var(--turbo-black);
+    }
+
+    &.btn-secondary {
+        --background: var(--turbo-dark-grey);
+        --color: var(--turbo-red-vibrant);
+        --border-color: var(--turbo-red-vibrant);
+        --border-width: 1px;
+        --border-style: solid;
+    }
+
+    &.cancel-btn {
+        /* FIX: Forzamos el color del texto para que no sea negro sobre negro */
+        --color: var(--turbo-grey-text) !important;
+        font-weight: normal;
+        font-size: 0.85rem;
+
+        &:hover {
+            --color: var(--turbo-white) !important;
+        }
+    }
+}
+
+/* --- OTROS ESTADOS --- */
+.success-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1.5rem;
+    text-align: center;
+
+    .success-icon {
+        color: var(--turbo-red-vibrant);
+        font-size: 80px;
+        filter: drop-shadow(0 0 10px var(--turbo-red-glow));
+    }
+}
+
 ion-progress-bar {
-    --progress-background: var(--turbo-red-vibrant);
     height: 8px;
     border-radius: 4px;
     margin: 15px 0;

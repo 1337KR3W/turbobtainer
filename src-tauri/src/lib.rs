@@ -1,8 +1,16 @@
 use tauri_plugin_shell::ShellExt;
 use tauri::{Emitter, Manager};
 
+
+// Añade esta estructura al principio de lib.rs
+#[derive(serde::Serialize)]
+struct VideoMetadata {
+    title: String,
+    thumbnail: String,
+}
+
 #[tauri::command]
-async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, String> {
+async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMetadata, String> {
     if url.trim().is_empty() {
         return Err("The URL cannot be empty.".into());
     }
@@ -11,18 +19,38 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, S
         format!("SYSTEM_ERROR: Download engine not available. ({})", e)
     })?;
 
+    // Pedimos título y miniatura (separados por un salto de línea en la salida)
     let output = sidecar
-        .args(["--get-title", "--no-playlist", "--skip-download", &url])
+        .args(["--get-title", 
+        "--get-thumbnail", 
+        "--no-playlist", 
+        "--skip-download", 
+        &url])
         .output()
         .await
         .map_err(|e| format!("EXECUTION_ERROR: Could not initiate analysis. ({})", e))?;
 
     if output.status.success() {
-        let title = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if title.is_empty() {
-            Err("CONTENT_ERROR: Could not extract title.".into())
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let lines: Vec<&str> = stdout.lines()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+        println!("Lineas capturadas: {:?}", lines);
+        
+        if lines.len() >= 2 {
+            Ok(VideoMetadata {
+                title: lines[0].trim().to_string(),
+                thumbnail: lines[1].trim().to_string(),
+            })
+        } else if lines.len() == 1 {
+             // Caso borde por si falla la miniatura pero tenemos título
+             Ok(VideoMetadata {
+                title: lines[0].trim().to_string(),
+                thumbnail: "".into(),
+            })
         } else {
-            Ok(title)
+            Err("CONTENT_ERROR: Could not extract metadata.".into())
         }
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
