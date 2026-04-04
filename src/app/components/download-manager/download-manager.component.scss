@@ -186,8 +186,24 @@ ion-button {
     }
 }
 
+/* --- BARRA DE PROGRESO (Loading Style) --- */
 ion-progress-bar {
-    height: 8px;
+    height: 10px;
     border-radius: 4px;
     margin: 15px 0;
+
+    // 1. Forzamos el color del progreso (la carga) a rojo
+    --progress-background: var(--turbo-red-vibrant);
+
+    // 2. Estilizamos las partes internas (Shadow DOM)
+    &::part(track) {
+        // El fondo de la barra (el "camino" azul)
+        background: #001a33;
+    }
+
+    &::part(progress) {
+        // La carga que se desplaza
+        background: var(--turbo-red-vibrant);
+        box-shadow: 0 0 10px var(--turbo-red-glow);
+    }
 }
