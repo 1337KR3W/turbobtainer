@@ -17,10 +17,10 @@ export class TauriService implements OnDestroy {
     if (!bytes || bytes === 'null' || bytes === 'NA') return 'Size: NA';
 
     // Quitamos cualquier cosa que no sea número (por si acaso)
-    const numericSize = String(bytes).replace(/[^0-9]/g, '');
-    const b = parseInt(numericSize);
+    const numericSize = String(bytes).replaceAll(/\D/g, '');
+    const b = Number.parseInt(numericSize);
 
-    if (isNaN(b) || b <= 0) return 'Size: NA';
+    if (Number.isNaN(b) || b <= 0) return 'Size: NA';
 
     return (b / (1024 * 1024)).toFixed(2) + ' MB';
   }
