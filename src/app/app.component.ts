@@ -17,6 +17,7 @@ import {
 import { FooterComponent } from './components/footer/footer.component';
 import { HeaderComponent } from "./components/header/header.component";
 import { DownloadManagerComponent } from "./components/download-manager/download-manager.component";
+import { MatrixBackgroundComponent } from "./components/matrix-background/matrix-background.component";
 
 @Component({
   selector: 'app-root',
@@ -25,7 +26,8 @@ import { DownloadManagerComponent } from "./components/download-manager/download
     CommonModule, FormsModule, IonApp, IonContent,
     FooterComponent,
     HeaderComponent,
-    DownloadManagerComponent
+    DownloadManagerComponent,
+    MatrixBackgroundComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']

@@ -113,11 +113,16 @@ a {
     background: var(--turbo-red-vibrant);
 }
 
-/* Al final de styles.scss */
+// Hacemos que la aplicación y el contenido sean transparentes
+ion-app,
 ion-content {
-    --background: var(--turbo-dark-grey) !important;
-    display: flex;
-    flex-direction: column;
+    --background: transparent !important;
+    background: transparent !important;
+}
+
+// Opcional: si usas el modo oscuro de Ionic, a veces hay que limpiar esto también
+.ion-page {
+    background: transparent !important;
 }
 
 app-download-manager {
