@@ -4,9 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4200 --open false",
+    "clean": "rimraf dist .angular src-tauri/target",
+    "prebuild": "npm run clean",
     "build": "ng build",
+    "build:msi": "ng build --configuration production && tauri build --bundles msi",
     "watch": "ng build --watch --configuration development",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "dev": "npm run clean && tauri dev"
   },
   "private": true,
   "dependencies": {
@@ -20,6 +24,7 @@
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-shell": "^2.3.5",
+    "rimraf": "^6.1.3",
     "rxjs": "~7.8.2",
     "tslib": "^2.8.1",
     "zone.js": "~0.15.1"

@@ -64,23 +64,26 @@ button {
     transition: all 0.25s ease;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     outline: none;
+}
 
-    &:hover {
-        border-color: var(--turbo-red-vibrant);
-        box-shadow: 0 0 12px var(--turbo-red-glow);
-        transform: translateY(-1px);
-    }
+input:hover,
+button:hover {
+    border-color: var(--turbo-red-vibrant);
+    box-shadow: 0 0 12px var(--turbo-red-glow);
+    transform: translateY(-1px);
+}
 
-    &:active {
-        background-color: var(--turbo-red-dark);
-        transform: translateY(0);
-    }
+input:active,
+button:active {
+    background-color: var(--turbo-red-dark);
+    transform: translateY(0);
+}
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        border-color: var(--turbo-grey-text);
-    }
+input:disabled,
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--turbo-grey-text);
 }
 
 /* Enlaces personalizados */
@@ -88,11 +91,11 @@ a {
     font-weight: 500;
     color: var(--turbo-red-vibrant);
     text-decoration: inherit;
+}
 
-    &:hover {
-        color: var(--turbo-white);
-        text-shadow: 0 0 5px var(--turbo-red-glow);
-    }
+a:hover {
+    color: var(--turbo-white);
+    text-shadow: 0 0 5px var(--turbo-red-glow);
 }
 
 /* Scrollbar personalizada para look Dark (opcional pero recomendado) */
