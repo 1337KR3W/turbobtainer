@@ -77,26 +77,50 @@ Turbobtainer uses a **Sidecar Pattern** to execute external binaries without req
 * **Rust:** [Install Rustup](https://rustup.rs/)
 * **Node.js:** v18+ (Recommended via `nvm`)
 * **Windows:** [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) and C++ Build Tools.
-
+  
 ### **Setup & Installation**
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-username/turbobtainer.git](https://github.com/your-username/turbobtainer.git)
+    git clone https://github.com/1337KR3W/turbobtainer.git
+    ```
+    ```bash
     cd turbobtainer
     ```
 
 2.  **Install Dependencies:**
+
+    Angular CLI
+    ```bash
+    npm install -g @angular/cli
+    ```
+    Ionic CLI
+    ```bash
+    npm install -g @ionic/cli
+    ```
+    Tauri CLI
+    ```bash
+    npm install -g @tauri-apps/cli
+    ```
+    Git LFS
+    ```bash
+    git lfs install
+    ```
+    Git LFS
+    ```bash
+    git lfs track "src-tauri/bin/*.exe
+    ```
+    Packages
     ```bash
     npm install
     ```
 
-3.  **Place Sidecar Binaries:**
+4.  **Place Sidecar Binaries:**
     Place your platform-specific binaries in `src-tauri/bin/` following the naming convention:
     * `ffmpeg-x86_64-pc-windows-msvc.exe`
     * `yt-dlp-x86_64-pc-windows-msvc.exe`
 
-4.  **Run & Build:**
+5.  **Run & Build:**
     ```bash
     # Development
     npm run tauri dev
@@ -123,12 +147,17 @@ turbobtainer/
 
 ## Disclaimer
 
-Turbobtainer is intended for personal use only.
-Downloading copyrighted material without permission is a violation of the Terms of Service of most platforms and may be illegal in your jurisdiction. The developers of Turbobtainer:
-Do not encourage or condone the unauthorized downloading of copyrighted content.
-Are not responsible for any misuse of this tool or copyright infringement committed by the user.
-Provide this software "as is," without warranty of any kind.
-By using this software, you agree to comply with all applicable local and international laws.
+HOLD IT RIGHT THERE, TURBO-USER!
+
+Turbobtainer is for saving your own memories or open-source content, not for building a pirate empire on your hard drive.
+
+* Don’t be a pirate: Downloading copyrighted stuff without permission is uncool (and illegal).
+
+* You’re the Captain: If you get into legal hot water, we’re jumping ship before you do.
+
+* No Warranties: If this software becomes self-aware and decides to go on strike on Mondays, don't call us.
+
+Use it wisely. If you agree, let the Turbobtainer-ing begin!
 
 Turbobtainer by 1337KR3W.
 
