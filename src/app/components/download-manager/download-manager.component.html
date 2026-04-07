@@ -14,8 +14,8 @@
 
         <ion-row class="ion-margin-top">
             <ion-col size="6">
-                <ion-button (keyup.enter)="onAnalizar.emit('audio')" expand="block" class="btn-secondary"
-                    (click)="onAnalizar.emit('audio')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+                <ion-button (keyup.enter)="analizar.emit('audio')" expand="block" class="btn-secondary"
+                    (click)="analizar.emit('audio')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
                     'audio') {
                     <ion-spinner name="dots" class="spinner-audio"></ion-spinner>
@@ -26,8 +26,8 @@
                 </ion-button>
             </ion-col>
             <ion-col size="6">
-                <ion-button (keyup.enter)="onAnalizar.emit('video')" expand="block" class="btn-primary"
-                    (click)="onAnalizar.emit('video')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+                <ion-button (keyup.enter)="analizar.emit('video')" expand="block" class="btn-primary"
+                    (click)="analizar.emit('video')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
                     'video') {
                     <ion-spinner name="dots" class="spinner-video"></ion-spinner>
@@ -89,12 +89,12 @@
         </ion-row>
     </ion-grid>
     <ion-footer class="ion-no-border ion-padding">
-        <ion-button type="button" (keyup.enter)="onDownload.emit()" expand="block" class="btn-primary"
-            (click)="onDownload.emit()">
+        <ion-button type="button" (keyup.enter)="download.emit()" expand="block" class="btn-primary"
+            (click)="download.emit()">
             <ion-icon name="cloud-download-outline" slot="start"></ion-icon> Turbobtain
         </ion-button>
-        <ion-button type="button" (keyup.enter)="onCancel.emit()" fill="clear" expand="block" color="medium"
-            (click)="onCancel.emit()">
+        <ion-button type="button" (keyup.enter)="cancelDld.emit()" fill="clear" expand="block" color="medium"
+            (click)="cancelDld.emit()">
             <ion-icon name="trash-outline" slot="start"></ion-icon> Cancel
         </ion-button>
     </ion-footer>
@@ -120,9 +120,9 @@
             </h1>
         </div>
 
-        <ion-button (keyup.enter)="onCancel.emit()" fill="outline" expand="block"
+        <ion-button (keyup.enter)="cancelDld.emit()" fill="outline" expand="block"
             style="--color: var(--turbo-red-vibrant); --border-color: var(--turbo-red-dark);" class="ion-margin-top"
-            (click)="onCancel.emit()">
+            (click)="cancelDld.emit()">
             Stop
         </ion-button>
     </ion-card-content>
@@ -139,8 +139,8 @@
             <p>The file is in your <strong>Downloads</strong> folder.</p>
         </div>
 
-        <ion-button (keyup.enter)="onCancel.emit()" expand="block" class="btn-primary ion-margin-top"
-            (click)="onCancel.emit()">
+        <ion-button (keyup.enter)="cancelDld.emit()" expand="block" class="btn-primary ion-margin-top"
+            (click)="cancelDld.emit()">
             <ion-icon name="refresh-outline" slot="start"></ion-icon>
             New download
         </ion-button>
@@ -157,8 +157,8 @@
             <p style="color: var(--turbo-white)">{{ tauriService.state().mensaje }}</p>
         </ion-label>
     </ion-item>
-    <ion-button (keyup.enter)="onCancel.emit()" fill="clear" expand="block" style="--color: var(--turbo-white)"
-        (click)="onCancel.emit()">
+    <ion-button (keyup.enter)="cancelDld.emit()" fill="clear" expand="block" style="--color: var(--turbo-white)"
+        (click)="cancelDld.emit()">
         Retry
     </ion-button>
 </ion-card>

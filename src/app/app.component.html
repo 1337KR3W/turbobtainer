@@ -3,8 +3,8 @@
 
   <ion-content class="ion-padding turbo-main-content">
 
-    <app-download-manager [(url)]="url" (onAnalizar)="analizar($event)" (onDownload)="iniciarDescarga()"
-      (onCancel)="cancelar()">
+    <app-download-manager [(url)]="url" (analizar)="analizar($event)" (download)="iniciarDescarga()"
+      (cancel)="cancelar()">
     </app-download-manager>
 
   </ion-content>
