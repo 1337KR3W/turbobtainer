@@ -190,3 +190,35 @@ ion-progress-bar {
     border-radius: 4px;
     margin: 15px 0;
 }
+
+// Thumbnail Preview
+.thumbnail-preview {
+    width: 100%;
+    height: 120px;
+    max-width: 180px;
+    border-radius: 1px;
+    border: 1px solid var(--turbo-red-dark);
+    margin: 0 auto;
+}
+
+// Metadata
+.metadata-list {
+    background-color: var(--turbo-black);
+
+    ion-label ion-list {
+        background-color: var(--turbo-black);
+    }
+
+    ion-item {
+        background-color: var(--turbo-black);
+        min-height: 30px;
+        font-size: 0.9rem;
+        color: var(--turbo-grey-text);
+        border-bottom: 1px solid var(--turbo-red-glow);
+
+        strong {
+            color: var(--turbo-white);
+            margin-left: 5px;
+        }
+    }
+}

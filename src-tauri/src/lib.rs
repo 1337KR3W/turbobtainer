@@ -1,8 +1,16 @@
 use tauri_plugin_shell::ShellExt;
 use tauri::{Emitter, Manager};
 
+#[derive(serde::Serialize)]
+struct VideoMetadata {
+    title: String,
+    thumbnail: String,
+    duration: String,
+    size: String
+}
+
 #[tauri::command]
-async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, String> {
+async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMetadata, String> {
     if url.trim().is_empty() {
         return Err("The URL cannot be empty.".into());
     }
@@ -12,18 +20,41 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, S
     })?;
 
     let output = sidecar
-        .args(["--get-title", "--no-playlist", "--skip-download", &url])
+        .args([
+            "--quiet",
+            "--no-warnings", 
+            "--no-playlist", 
+            "--skip-download",
+            "--print", "{\"title\":%(title)j, \"thumbnail\":%(thumbnail)j, \"duration\":%(duration_string)j, \"size\":%(filesize,filesize_approx)j}", 
+            &url
+            ])
+
         .output()
         .await
         .map_err(|e| format!("EXECUTION_ERROR: Could not initiate analysis. ({})", e))?;
 
     if output.status.success() {
-        let title = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if title.is_empty() {
-            Err("CONTENT_ERROR: Could not extract title.".into())
-        } else {
-            Ok(title)
-        }
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let json_line = stdout.lines().next().unwrap_or("{}");
+        let v: serde_json::Value = serde_json::from_str(json_line).map_err(|e| {
+            format!("JSON_PARSE_ERROR: {}. Raw: {}", e, json_line)
+        })?;
+        
+        Ok(VideoMetadata {
+            // .as_str() maneja las comillas automáticamente
+            title: v["title"].as_str().unwrap_or("Unknown Title").to_string(),
+            thumbnail: v["thumbnail"].as_str().unwrap_or("").to_string(),
+            duration: v["duration"].as_str().unwrap_or("00:00").to_string(),
+            // El tamaño puede ser número o string, lo pasamos a string para el frontend
+            size: match v["size"].as_f64() {
+                Some(bytes) => {
+                    let mb = bytes / 1024.0 / 1024.0;
+                    format!("{:.2} MB", mb) // Formatea a 2 decimales + el texto " MB"
+                },
+                None => "Unknown size".to_string(),
+            },
+        })
+        
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
         Err(format!("SYSTEM_ERROR: {}", stderr.trim()))
@@ -32,7 +63,7 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<String, S
 
 #[tauri::command]
 async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Result<String, String> {
-    // 1. RESOLUCIÓN DE RUTA DE FFMPEG
+    //RESOLUCIÓN DE RUTA DE FFMPEG
     let target_triple = tauri::utils::platform::target_triple().unwrap_or_default();
     let ffmpeg_name = format!("ffmpeg-{}.exe", target_triple);
     
@@ -60,11 +91,11 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
     
     let ffmpeg_str = ffmpeg_path.to_string_lossy().to_string();
 
-    // 2. DIRECTORIO DE DESCARGA Y PARÁMETROS
+    //DIRECTORIO DE DESCARGA Y PARÁMETROS
     let download_dir = app.path().download_dir()
         .map_err(|e| format!("Download directory not found: {}", e))?;
     
-    let output_str = download_dir.join("Turbobtainer_%(title).150s_%(epoch)s.%(ext)s")
+    let output_str = download_dir.join("%(title).150s_Turbobtainer_%(epoch)s.%(ext)s")
         .to_string_lossy().to_string();
 
     let mut args = vec![
@@ -88,7 +119,7 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
 
     args.push(&url);
 
-    // 3. EJECUCIÓN
+    //EJECUCIÓN
     let (mut rx, _child) = app.shell()
         .sidecar("yt-dlp")
         .map_err(|e| format!("Sidecar error: {}", e))?

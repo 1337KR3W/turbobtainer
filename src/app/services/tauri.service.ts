@@ -46,11 +46,14 @@ export class TauriService implements OnDestroy {
     this._state.set({ status: 'ANALYZING', tipoSeleccionado: tipo });
 
     try {
-      const titulo = await invoke<string>('check_video_url', { url });
+      const metadata = await invoke<any>('check_video_url', { url });
       this._state.set({
         status: 'READY',
-        videoTitle: titulo,
         tipoSeleccionado: tipo,
+        videoTitle: metadata.title,
+        thumbnail: metadata.thumbnail,
+        duration: metadata.duration,
+        size: metadata.size,
         progreso: 0
       });
     } catch (error) {
