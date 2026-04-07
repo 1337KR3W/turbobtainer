@@ -3,7 +3,7 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba(10, 10, 10, 0.95);
+    background: var(--turbo-black);
     border-top: 1px solid var(--turbo-red-dark);
     padding: 10px 20px;
     backdrop-filter: blur(10px);
@@ -13,7 +13,6 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-
         margin: 0 auto;
     }
 
@@ -40,7 +39,6 @@
         display: flex;
         align-items: center;
         gap: 6px;
-        background: rgba(255, 255, 255, 0.03);
         padding: 4px 10px;
         border-radius: 4px;
 

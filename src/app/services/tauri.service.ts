@@ -12,18 +12,6 @@ export class TauriService implements OnDestroy {
   private unlistenProgress?: UnlistenFn;
   private urlMemoria: string = '';
 
-  private formatBytes(bytes: any): string {
-    // Si es null, undefined o la cadena "null" que devuelve to_string() en Rust
-    if (!bytes || bytes === 'null' || bytes === 'NA') return 'Size: NA';
-
-    // Quitamos cualquier cosa que no sea número (por si acaso)
-    const numericSize = String(bytes).replaceAll(/\D/g, '');
-    const b = Number.parseInt(numericSize);
-
-    if (Number.isNaN(b) || b <= 0) return 'Size: NA';
-
-    return (b / (1024 * 1024)).toFixed(2) + ' MB';
-  }
   constructor() {
     this.setupListeners();
   }
@@ -58,15 +46,10 @@ export class TauriService implements OnDestroy {
     this._state.set({ status: 'ANALYZING', tipoSeleccionado: tipo });
 
     try {
-
-      const data = await invoke<{ title: string, thumbnail: string, duration: string, size: string }>('check_video_url', { url });
-      console.log('Datos recibidos de Rust:', data); // <-- Añade este log para depurar
+      const titulo = await invoke<string>('check_video_url', { url });
       this._state.set({
         status: 'READY',
-        videoTitle: data.title,
-        thumbnailUrl: data.thumbnail,
-        duration: data.duration,
-        size: this.formatBytes(data.size),
+        videoTitle: titulo,
         tipoSeleccionado: tipo,
         progreso: 0
       });

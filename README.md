@@ -31,7 +31,7 @@ Turbobtainer is a high-performance desktop application designed for seamless mul
 
 | File | Description |
 | :--- | :--- |
-| [turbobtainer_1.0.0_x64.msi](https://github.com/1337KR3W/turbobtainer/releases/download/v1.0.0/turbobtainer_1.0.0_x64_en-US.msi) | Windows Managed Installer (64-bit). Includes automated resource mapping and system integration. |
+| `turbobtainer_1.0.0_x64.msi` | Windows Managed Installer (64-bit). Includes automated resource mapping and system integration. |
 
 ---
 

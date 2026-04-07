@@ -18,7 +18,7 @@ export class DownloadManagerComponent {
 
   @Input() url: string = '';
   @Output() urlChange = new EventEmitter<string>();
-  @Output() analizar = new EventEmitter<'audio' | 'video'>();
-  @Output() download = new EventEmitter<void>();
-  @Output() cancelDld = new EventEmitter<void>();
+  @Output() onAnalizar = new EventEmitter<'audio' | 'video'>();
+  @Output() onDownload = new EventEmitter<void>();
+  @Output() onCancel = new EventEmitter<void>();
 }
