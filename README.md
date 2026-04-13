@@ -1,5 +1,6 @@
 <img width="746" height="176" alt="banner" src="https://github.com/user-attachments/assets/12d94fdd-cb1d-4ff1-821e-cd97c24533c0" />
 
+[![Version](https://img.shields.io/badge/Version-1.1.0-blue?style=flat-square&logo=githubactions)](https://github.com/1337KR3W/turbobtainer/releases)
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri-24c8db?style=flat-square&logo=tauri)](https://tauri.app/)
 [![Node.js](https://img.shields.io/badge/Runtime-Node.js-339933?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Angular](https://img.shields.io/badge/Frontend-Angular%2017-dd0031?style=flat-square&logo=angular)](https://angular.io/)
@@ -31,7 +32,7 @@ Turbobtainer is a high-performance desktop application designed for seamless mul
 
 | File | Description |
 | :--- | :--- |
-| `turbobtainer_1.0.0_x64.msi` | Windows Managed Installer (64-bit). Includes automated resource mapping and system integration. |
+| [`turbobtainer_1.1.5_x64.msi`](https://github.com/1337KR3W/turbobtainer/releases/download/v1.1.5/turbobtainer_1.1.5_x64_en-US.msi) | Windows Managed Installer (64-bit). Includes automated resource mapping and system integration. |
 
 ---
 
