@@ -28,7 +28,6 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMeta
             "--print", "{\"title\":%(title)j, \"thumbnail\":%(thumbnail)j, \"duration\":%(duration_string)j, \"size\":%(filesize,filesize_approx)j}", 
             &url
             ])
-
         .output()
         .await
         .map_err(|e| format!("EXECUTION_ERROR: Could not initiate analysis. ({})", e))?;
@@ -41,15 +40,13 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMeta
         })?;
         
         Ok(VideoMetadata {
-            // .as_str() maneja las comillas automáticamente
             title: v["title"].as_str().unwrap_or("Unknown Title").to_string(),
             thumbnail: v["thumbnail"].as_str().unwrap_or("").to_string(),
             duration: v["duration"].as_str().unwrap_or("00:00").to_string(),
-            // El tamaño puede ser número o string, lo pasamos a string para el frontend
             size: match v["size"].as_f64() {
                 Some(bytes) => {
                     let mb = bytes / 1024.0 / 1024.0;
-                    format!("{:.2} MB", mb) // Formatea a 2 decimales + el texto " MB"
+                    format!("{:.2} MB", mb)
                 },
                 None => "Unknown size".to_string(),
             },
@@ -63,40 +60,32 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMeta
 
 #[tauri::command]
 async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Result<String, String> {
-    //RESOLUCIÓN DE RUTA DE FFMPEG
+    
     let target_triple = tauri::utils::platform::target_triple().unwrap_or_default();
-    let ffmpeg_name = format!("ffmpeg-{}.exe", target_triple);
-    
-    // En desarrollo: buscar en CARGO_MANIFEST_DIR/bin (src-tauri/bin)
-    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let dev_path = manifest_dir.join("bin").join(&ffmpeg_name);
-    
-    // En producción: buscar junto al ejecutable
-    let exe_path = std::env::current_exe()
-        .ok()
-        .and_then(|exe| exe.parent().map(|p| p.to_path_buf()))
-        .map(|dir| dir.join(&ffmpeg_name));
-    
-    let ffmpeg_path = if dev_path.exists() {
-        dev_path
-    } else if let Some(exe_p) = exe_path {
-        if exe_p.exists() {
-            exe_p
-        } else {
-            return Err("FFmpeg not found. Please reinstall the application.".into());
-        }
-    } else {
-        return Err("FFmpeg not found. Please reinstall the application.".into());
-    };
-    
+    let ffmpeg_file = format!("bin/ffmpeg-{}.exe", target_triple);
+
+    // El PathResolver es la única autoridad fiable para encontrar archivos empaquetados.
+    // BaseDirectory::Resource buscará en 'src-tauri' en dev y en la carpeta de instalación en prod.
+    let ffmpeg_path = app.path()
+        .resolve(&ffmpeg_file, tauri::path::BaseDirectory::Resource)
+        .map_err(|e| format!("Infraestructure Error: Conversion engine not found ({})", e))?;
+
+    // 3. Verificación de integridad
+    if !ffmpeg_path.exists() {
+        return Err(format!(
+            "System error: FFmpeg not found in: {}", 
+            ffmpeg_path.display()
+        ).into());
+    }
+
     let ffmpeg_str = ffmpeg_path.to_string_lossy().to_string();
 
-    //DIRECTORIO DE DESCARGA Y PARÁMETROS
+    // --- DIRECTORIO DE DESCARGA ---
     let download_dir = app.path().download_dir()
-        .map_err(|e| format!("Download directory not found: {}", e))?;
-    
+    .map_err(|e| format!("Download path not fount: {}", e))?;
+
     let output_str = download_dir.join("%(title).150s_Turbobtainer_%(epoch)s.%(ext)s")
-        .to_string_lossy().to_string();
+    .to_string_lossy().to_string();
 
     let mut args = vec![
         "--newline",
@@ -119,13 +108,13 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
 
     args.push(&url);
 
-    //EJECUCIÓN
+    // Ejecutamos yt-dlp como sidecar nativo
     let (mut rx, _child) = app.shell()
         .sidecar("yt-dlp")
-        .map_err(|e| format!("Sidecar error: {}", e))?
+        .map_err(|e| format!("Sidecar error yt-dlp: {}", e))?
         .args(args)
         .spawn()
-        .map_err(|e| format!("Process error: {}", e))?;
+        .map_err(|e| format!("Error initializing process...: {}", e))?;
 
     tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
