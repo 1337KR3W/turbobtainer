@@ -14,6 +14,16 @@ export class TauriService implements OnDestroy {
 
   constructor() {
     this.setupListeners();
+    this.testGallery();
+  }
+
+  async testGallery() {
+    try {
+      const version = await invoke('check_gallery_binary');
+      console.log('Gallery-dl Version:', version);
+    } catch (error) {
+      console.error('Error llamando al sidecar:', error);
+    }
   }
 
   private async setupListeners() {
@@ -63,6 +73,39 @@ export class TauriService implements OnDestroy {
       });
     }
   }
+  async obtenerMetadataGaleria(url: string) {
+    this.urlMemoria = url;
+    this._state.set({ status: 'ANALYZING', tipoSeleccionado: 'gallery' });
+
+    try {
+      // Llamamos al nuevo comando de Rust
+      const metadata = await invoke<any>('check_gallery_url', { url });
+
+      this._state.set({
+        status: 'READY',
+        tipoSeleccionado: 'gallery',
+        videoTitle: metadata.title, // "Gallery Content"
+        imageCount: metadata.count,
+        mensaje: metadata.description,
+        progreso: 0
+      });
+
+      console.log('Metadatos de galería recibidos:', metadata);
+    } catch (error) {
+      this._state.set({
+        status: 'ERROR',
+        mensaje: error as string
+      });
+    }
+  }
+
+  async procesarUrl(url: string, tipo: 'audio' | 'video' | 'gallery') {
+    if (tipo === 'gallery') {
+      return this.obtenerMetadataGaleria(url);
+    } else {
+      return this.obtenerMetadata(url, tipo);
+    }
+  }
 
   async iniciarDescarga() {
     const actual = this._state();
@@ -71,10 +114,15 @@ export class TauriService implements OnDestroy {
     this._state.update(s => ({ ...s, status: 'DOWNLOADING', progreso: 0 }));
 
     try {
-      await invoke('download_video', {
-        url: this.urlMemoria,
-        tipo: actual.tipoSeleccionado
-      });
+      if (actual.tipoSeleccionado === 'gallery') {
+        console.log('Iniciando descarga de galeria, pendiente comando de Rust')
+      } else {
+        await invoke('download_video', {
+          url: this.urlMemoria,
+          tipo: actual.tipoSeleccionado
+        });
+      }
+
     } catch (error) {
       this._state.set({ status: 'ERROR', mensaje: error as string });
     }

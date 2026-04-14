@@ -18,7 +18,10 @@ export class DownloadManagerComponent {
 
   @Input() url: string = '';
   @Output() urlChange = new EventEmitter<string>();
-  @Output() analizar = new EventEmitter<'audio' | 'video'>();
+  @Output() analizar = new EventEmitter<'audio' | 'video' | 'gallery'>();
   @Output() download = new EventEmitter<void>();
   @Output() cancelDld = new EventEmitter<void>();
+  get status() {
+    return this.tauriService.state().status;
+  }
 }

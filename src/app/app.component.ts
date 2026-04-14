@@ -49,11 +49,15 @@ export class AppComponent {
   }
 
   /**
-   * Acción para los botones de Audio/Video
+   * Acción para los botones de Audio/Video/Gallery
    */
-  analizar(tipo: 'audio' | 'video') {
-    if (this.url.trim()) {
-      this.tauriService.obtenerMetadata(this.url, tipo);
+  async analizar(tipo: 'audio' | 'video' | 'gallery') {
+    if (!this.url) return;
+
+    if (tipo === 'gallery') {
+      await this.tauriService.obtenerMetadataGaleria(this.url);
+    } else {
+      await this.tauriService.obtenerMetadata(this.url, tipo);
     }
   }
 

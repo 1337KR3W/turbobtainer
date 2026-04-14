@@ -4,9 +4,10 @@ export interface AppState {
     status: DownloadStatus;
     mensaje?: string;
     videoTitle?: string;
-    tipoSeleccionado?: 'audio' | 'video';
+    tipoSeleccionado?: 'audio' | 'video' | 'gallery';
     thumbnail?: string;
     duration?: string;
     size?: string;
+    imageCount?: number;
     progreso?: number;
 }

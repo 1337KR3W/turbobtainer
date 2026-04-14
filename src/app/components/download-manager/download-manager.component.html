@@ -13,7 +13,7 @@
         </ion-item>
 
         <ion-row class="ion-margin-top">
-            <ion-col size="6">
+            <ion-col size="4">
                 <ion-button (keyup.enter)="analizar.emit('audio')" expand="block" class="btn-secondary"
                     (click)="analizar.emit('audio')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
@@ -25,7 +25,7 @@
                     }
                 </ion-button>
             </ion-col>
-            <ion-col size="6">
+            <ion-col size="4">
                 <ion-button (keyup.enter)="analizar.emit('video')" expand="block" class="btn-primary"
                     (click)="analizar.emit('video')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
@@ -34,6 +34,19 @@
                     } @else {
                     <ion-icon name="videocam-outline" slot="start"></ion-icon>
                     Video
+                    }
+                </ion-button>
+            </ion-col>
+
+            <ion-col size="4">
+                <ion-button (keyup.enter)="analizar.emit('gallery')" expand="block" class="btn-primary"
+                    (click)="analizar.emit('gallery')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+                    @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
+                    'gallery') {
+                    <ion-spinner name="dots" class="spinner-video"></ion-spinner>
+                    } @else {
+                    <ion-icon name="videocam-outline" slot="start"></ion-icon>
+                    Gallery
                     }
                 </ion-button>
             </ion-col>
@@ -74,6 +87,21 @@
                     <ion-item>
                         <ion-label>Size:
                             <strong>{{ tauriService.state().size }}</strong>
+                        </ion-label>
+                    </ion-item>
+                    }
+                    @if (tauriService.state().imageCount) {
+                    <ion-item>
+                        <ion-label>Images found:
+                            <strong>{{ tauriService.state().imageCount }} items</strong>
+                        </ion-label>
+                    </ion-item>
+                    }
+
+                    @if (tauriService.state().mensaje && tauriService.state().tipoSeleccionado === 'gallery') {
+                    <ion-item>
+                        <ion-label class="ion-text-wrap">
+                            <small>{{ tauriService.state().mensaje }}</small>
                         </ion-label>
                     </ion-item>
                     }

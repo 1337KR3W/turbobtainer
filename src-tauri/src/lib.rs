@@ -9,6 +9,14 @@ struct VideoMetadata {
     size: String
 }
 
+#[derive(serde::Serialize)]
+struct GalleryMetadata {
+    title: String,
+    thumbnail: String,
+    count: usize,
+    description: String
+}
+
 #[tauri::command]
 async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMetadata, String> {
     if url.trim().is_empty() {
@@ -146,6 +154,57 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
     Ok("Download process initiated".into())
 }
 
+#[tauri::command]
+async fn check_gallery_binary(app: tauri::AppHandle) -> Result<String, String> {
+    let sidecar = app.shell().sidecar("gallery-dl")
+        .map_err(|e| format!("Error al cargar sidecar: {}", e))?;
+
+    let output = sidecar
+        .args(["--version"])
+        .output()
+        .await
+        .map_err(|e| format!("Error de ejecución: {}", e))?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}
+
+#[tauri::command]
+async fn check_gallery_url(app: tauri::AppHandle, url: String) -> Result<GalleryMetadata, String> {
+    let sidecar = app.shell().sidecar("gallery-dl")
+        .map_err(|e| format!("SYSTEM_ERROR: Engine not available. ({})", e))?;
+
+    // Usamos -j para obtener JSON y --get-urls para listar lo que encontraría
+    let output = sidecar
+        .args(["-j", "--get-urls", &url])
+        .output()
+        .await
+        .map_err(|e| format!("EXECUTION_ERROR: Failed to analyze gallery. ({})", e))?;
+
+    if output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        
+        // gallery-dl a veces devuelve varias líneas de JSON o logs. 
+        // Vamos a contar las líneas que parecen URLs para saber cuántas imágenes hay.
+        let lines: Vec<&str> = stdout.lines().collect();
+        let image_count = lines.iter().filter(|l| l.starts_with("http")).count();
+
+        // Por ahora, devolvemos una metadata simplificada
+        Ok(GalleryMetadata {
+            title: "Gallery Content".to_string(), // gallery-dl no siempre da el título fácil en el JSON
+            thumbnail: "".to_string(),             // Veremos cómo extraer la primera imagen luego
+            count: image_count,
+            description: format!("Found {} images available for download.", image_count)
+        })
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!("GALLERY_ERROR: {}", stderr.trim()))
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -153,7 +212,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             check_video_url,
-            download_video
+            download_video,
+            check_gallery_binary,
+            check_gallery_url
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
