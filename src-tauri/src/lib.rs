@@ -1,5 +1,7 @@
 use tauri_plugin_shell::ShellExt;
 use tauri::{Emitter, Manager};
+use std::fs;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(serde::Serialize)]
 struct VideoMetadata {
@@ -205,6 +207,47 @@ async fn check_gallery_url(app: tauri::AppHandle, url: String) -> Result<Gallery
     }
 }
 
+#[tauri::command]
+async fn download_gallery(app: tauri::AppHandle, url: String) -> Result<String, String> {
+    // 1. Obtener la ruta de Descargas del sistema
+    let download_dir = app.path().download_dir()
+        .map_err(|e| format!("Could not find download directory: {}", e))?;
+
+    // 2. Generar un nombre único basado en el tiempo
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    
+    let folder_name = format!("TurboTainer_Gallery_{}", timestamp);
+    let full_path = download_dir.join(folder_name);
+
+    // 3. Crear la carpeta físicamente
+    fs::create_dir_all(&full_path)
+        .map_err(|e| format!("Failed to create gallery folder: {}", e))?;
+
+    // 4. Configurar el Sidecar de gallery-dl
+    let sidecar = app.shell().sidecar("gallery-dl")
+        .map_err(|e| format!("Engine not available: {}", e))?;
+
+    // Argumento -d especifica dónde guardar
+    // Ejecutamos de forma asíncrona pero esperamos el resultado final (por ahora)
+    let output = sidecar
+        .args(["-d", &full_path.to_string_lossy(), &url])
+        .output()
+        .await
+        .map_err(|e| format!("Download execution error: {}", e))?;
+
+    if output.status.success() {
+        // Al terminar, emitimos el progreso 1.0 para que Angular sepa que terminó
+        let _ = app.emit("download-progress", 1.0);
+        Ok(format!("Gallery successfully saved to: {}", full_path.display()))
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!("Gallery-dl error: {}", stderr.trim()))
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -214,7 +257,8 @@ pub fn run() {
             check_video_url,
             download_video,
             check_gallery_binary,
-            check_gallery_url
+            check_gallery_url,
+            download_gallery
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

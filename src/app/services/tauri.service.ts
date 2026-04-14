@@ -115,8 +115,24 @@ export class TauriService implements OnDestroy {
 
     try {
       if (actual.tipoSeleccionado === 'gallery') {
-        console.log('Iniciando descarga de galeria, pendiente comando de Rust')
+        // --- LLAMADA REAL AL COMANDO DE RUST ---
+        // Usamos invoke para llamar al comando que acabas de compilar
+        const resultado = await invoke<string>('download_gallery', {
+          url: this.urlMemoria
+        });
+
+        console.log(resultado); // Muestra la ruta de la carpeta creada en la consola
+
+        // El comando en Rust ya emite 'download-progress' con 1.0 al terminar,
+        // pero por seguridad forzamos el estado aquí también si la promesa se resuelve.
+        this._state.update(s => ({
+          ...s,
+          status: 'SUCCESS',
+          progreso: 1
+        }));
+
       } else {
+        // Lógica existente para yt-dlp
         await invoke('download_video', {
           url: this.urlMemoria,
           tipo: actual.tipoSeleccionado
@@ -124,6 +140,7 @@ export class TauriService implements OnDestroy {
       }
 
     } catch (error) {
+      console.error('Error en la descarga:', error);
       this._state.set({ status: 'ERROR', mensaje: error as string });
     }
   }
