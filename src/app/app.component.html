@@ -6,7 +6,11 @@
     <app-download-manager [(url)]="url" (analizar)="analizar($event)" (download)="iniciarDescarga()"
       (cancelDld)="cancelar()">
     </app-download-manager>
+    <ion-button type="button" (click)="openSupportModal()">
 
+      <ion-icon name="globe-outline"></ion-icon>
+      Supported platforms (+100)
+    </ion-button>
   </ion-content>
 
   <app-footer></app-footer>

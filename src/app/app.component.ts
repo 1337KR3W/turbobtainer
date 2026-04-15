@@ -1,22 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { TauriService } from './services/tauri.service';
-import { IonApp, IonContent } from '@ionic/angular/standalone';
-
-import { addIcons } from 'ionicons';
-import {
-  musicalNotesOutline,
-  videocamOutline,
-  checkmarkDoneOutline,
-  alertCircleOutline,
-  trashOutline,
-  cloudDownloadOutline,
-  logoYoutube
-} from 'ionicons/icons';
+import { IonApp, IonContent, IonButton, IonIcon } from '@ionic/angular/standalone';
 import { FooterComponent } from './components/footer/footer.component';
 import { HeaderComponent } from "./components/header/header.component";
 import { DownloadManagerComponent } from "./components/download-manager/download-manager.component";
+import { SupportGrid } from './components/support-grid/support-grid';
+import { UtilsService } from './services/utils.service';
 
 @Component({
   selector: 'app-root',
@@ -25,32 +15,17 @@ import { DownloadManagerComponent } from "./components/download-manager/download
     CommonModule, FormsModule, IonApp, IonContent,
     FooterComponent,
     HeaderComponent,
-    DownloadManagerComponent
+    DownloadManagerComponent,
+    IonButton,
+    IonIcon
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
-
-  public tauriService = inject(TauriService);
+export class AppComponent extends UtilsService {
 
   url: string = '';
 
-  constructor() {
-    addIcons({
-      musicalNotesOutline,
-      videocamOutline,
-      checkmarkDoneOutline,
-      alertCircleOutline,
-      trashOutline,
-      cloudDownloadOutline,
-      logoYoutube
-    });
-  }
-
-  /**
-   * Acción para los botones de Audio/Video/Gallery
-   */
   async analizar(tipo: 'audio' | 'video' | 'gallery') {
     if (!this.url) return;
 
@@ -61,14 +36,17 @@ export class AppComponent {
     }
   }
 
-  /**
-   * Acción para resetear y volver al inicio
-   */
   cancelar() {
     this.url = '';
     this.tauriService.reset();
   }
   iniciarDescarga() {
     this.tauriService.iniciarDescarga();
+  }
+  async openSupportModal() {
+    const modal = await this.modalCtrl.create({
+      component: SupportGrid,
+    });
+    return await modal.present();
   }
 }

@@ -2,6 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChang
 import { provideRouter } from "@angular/router";
 import { routes } from "./app.routes";
 import { provideIonicAngular } from '@ionic/angular/standalone'; // <--- Importación Standalone
+import { ModalController } from "@ionic/angular";
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -10,6 +11,7 @@ export const appConfig: ApplicationConfig = {
     provideIonicAngular({
       mode: 'md',
       rippleEffect: true
-    })
+    }),
+    ModalController
   ],
 };

@@ -1,21 +1,14 @@
-/* Asegurar que el componente sea visible */
-:host {
-    display: block;
-    width: 100%;
-    min-height: 200px;
-    /* Evita que colapse a 0px */
-}
-
+/*
 .turbo-card-container {
     --background: var(--turbo-black);
     --color: var(--turbo-white);
     border-radius: 12px;
-    border: 1px solid #1a1a1a;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    margin: 20px 0;
-    display: block !important;
+    //border: 1px solid #1a1a1a;
+    //box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    //margin: 20px 0;
+    //display: block !important;
     /* Forzar visibilidad */
-
+/*
     ion-item {
         --background: transparent;
         --color: var(--turbo-white);
@@ -36,7 +29,7 @@
         color: var(--turbo-grey-text);
     }
 }
-
+*/
 /*Estilo de las Tarjetas (Cards) */
 ion-card {
     --background: var(--turbo-black);

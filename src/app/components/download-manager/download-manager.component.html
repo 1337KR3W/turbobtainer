@@ -15,7 +15,8 @@
         <ion-row class="ion-margin-top">
             <ion-col size="4">
                 <ion-button (keyup.enter)="analizar.emit('audio')" expand="block" class="btn-secondary"
-                    (click)="analizar.emit('audio')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+                    (click)="analizar.emit('audio')"
+                    [disabled]="tauriService.state().status === 'ANALYZING' || !url || !this.isVideoUrl() ">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
                     'audio') {
                     <ion-spinner name="dots" class="spinner-audio"></ion-spinner>
@@ -27,7 +28,8 @@
             </ion-col>
             <ion-col size="4">
                 <ion-button (keyup.enter)="analizar.emit('video')" expand="block" class="btn-primary"
-                    (click)="analizar.emit('video')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+                    (click)="analizar.emit('video')"
+                    [disabled]="tauriService.state().status === 'ANALYZING' || !url || !this.isVideoUrl()">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
                     'video') {
                     <ion-spinner name="dots" class="spinner-video"></ion-spinner>
@@ -40,12 +42,13 @@
 
             <ion-col size="4">
                 <ion-button (keyup.enter)="analizar.emit('gallery')" expand="block" class="btn-primary"
-                    (click)="analizar.emit('gallery')" [disabled]="tauriService.state().status === 'ANALYZING' || !url">
+                    (click)="analizar.emit('gallery')"
+                    [disabled]="tauriService.state().status === 'ANALYZING' || !url || !this.isGalleryUrl()">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
                     'gallery') {
                     <ion-spinner name="dots" class="spinner-video"></ion-spinner>
                     } @else {
-                    <ion-icon name="videocam-outline" slot="start"></ion-icon>
+                    <ion-icon name="image-outline" slot="start"></ion-icon>
                     Gallery
                     }
                 </ion-button>

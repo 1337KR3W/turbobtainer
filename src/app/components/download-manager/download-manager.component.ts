@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TauriService } from '../../services/tauri.service';
 import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonIcon, IonInput, IonItem, IonProgressBar, IonRow, IonSpinner, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter } from '@ionic/angular/standalone';
+import { UtilsService } from '../../services/utils.service';
 
 @Component({
   selector: 'app-download-manager',
@@ -13,15 +13,30 @@ import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, Ion
   templateUrl: './download-manager.component.html',
   styleUrls: ['./download-manager.component.scss']
 })
-export class DownloadManagerComponent {
-  public tauriService = inject(TauriService);
+export class DownloadManagerComponent extends UtilsService {
+
+  public readonly supportedPlatforms = this.MASTER_SITES;
 
   @Input() url: string = '';
   @Output() urlChange = new EventEmitter<string>();
   @Output() analizar = new EventEmitter<'audio' | 'video' | 'gallery'>();
   @Output() download = new EventEmitter<void>();
   @Output() cancelDld = new EventEmitter<void>();
+
+  constructor() {
+    super();
+    this.initializeIcons();
+  }
+
   get status() {
     return this.tauriService.state().status;
+  }
+
+  override isVideoUrl(): boolean {
+    return super.isVideoUrl(this.url);
+  }
+
+  override isGalleryUrl(): boolean {
+    return super.isGalleryUrl(this.url);
   }
 }

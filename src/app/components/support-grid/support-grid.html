@@ -1,0 +1,40 @@
+<ion-header class="ion-no-border">
+    <ion-toolbar>
+        <ion-title>Supported platforms</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="dismiss()">
+                <ion-icon slot="icon-only" name="close"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+    <ion-toolbar>
+        <ion-searchbar placeholder="Search site (ej: Instagram)" (ionInput)="filterSites($event)"
+            (ionClear)="filterSites($event)" mode="ios" show-clear-button="always">
+        </ion-searchbar>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <ion-grid fixed>
+        <ion-row class="ion-justify-content-center">
+            @for (sitio of sitiosSoportados; track $index) {
+            <ion-col size="3" size-sm="2" size-md="1.5">
+                <div class="platform-item">
+                    <div class="icon-box">
+                        <img [src]="getIconUrl(sitio)" [alt]="sitio" loading="lazy">
+                    </div>
+                    <span class="platform-name">{{ sitio.split('.')[0] }}</span>
+                </div>
+            </ion-col>
+            }
+
+        </ion-row>
+    </ion-grid>
+    @if (sitiosSoportados.length === 0) {
+    <div class="ion-text-center ion-padding">
+        <ion-icon name="search-outline" style="font-size: 3rem; opacity: 0.3;"></ion-icon>
+        <p>Platform not supported yet, gallery-dl is updated everyday.</p>
+    </div>
+    }
+
+</ion-content>
