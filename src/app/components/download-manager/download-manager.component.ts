@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonIcon, IonInput, IonItem, IonProgressBar, IonRow, IonSpinner, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter } from '@ionic/angular/standalone';
 import { UtilsService } from '../../services/utils.service';
+import { SupportGrid } from '../support-grid/support-grid';
 
 @Component({
   selector: 'app-download-manager',
@@ -19,7 +20,7 @@ export class DownloadManagerComponent extends UtilsService {
 
   @Input() url: string = '';
   @Output() urlChange = new EventEmitter<string>();
-  @Output() analizar = new EventEmitter<'audio' | 'video' | 'gallery'>();
+  @Output() analyze = new EventEmitter<'audio' | 'video' | 'gallery'>();
   @Output() download = new EventEmitter<void>();
   @Output() cancelDld = new EventEmitter<void>();
 
@@ -38,5 +39,11 @@ export class DownloadManagerComponent extends UtilsService {
 
   override isGalleryUrl(): boolean {
     return super.isGalleryUrl(this.url);
+  }
+  async openSupportModal() {
+    const modal = await this.modalCtrl.create({
+      component: SupportGrid,
+    });
+    return await modal.present();
   }
 }

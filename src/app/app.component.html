@@ -3,14 +3,10 @@
 
   <ion-content class="ion-padding turbo-main-content">
 
-    <app-download-manager [(url)]="url" (analizar)="analizar($event)" (download)="iniciarDescarga()"
-      (cancelDld)="cancelar()">
+    <app-download-manager [(url)]="url" (analyze)="checkUrlType($event)" (download)="startDownload()"
+      (cancelDld)="cancel()">
     </app-download-manager>
-    <ion-button type="button" (click)="openSupportModal()">
 
-      <ion-icon name="globe-outline"></ion-icon>
-      Supported platforms (+100)
-    </ion-button>
   </ion-content>
 
   <app-footer></app-footer>

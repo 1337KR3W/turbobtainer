@@ -6,6 +6,7 @@ export interface AppState {
     videoTitle?: string;
     tipoSeleccionado?: 'audio' | 'video' | 'gallery';
     thumbnail?: string;
+    sourceLogo?: string;
     duration?: string;
     size?: string;
     imageCount?: number;

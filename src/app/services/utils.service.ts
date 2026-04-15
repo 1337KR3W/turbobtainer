@@ -62,4 +62,22 @@ export class UtilsService {
         // Comprobamos contra la lista de plataformas del modelo de datos
         return this.MASTER_SITES.some(sitio => urlLower.includes(sitio));
     }
+    public getPlatformLogo(url: string): string {
+        if (!url) return '';
+        const urlLower = url.toLowerCase();
+
+        // Buscamos cuál de nuestras plataformas soportadas está en la URL
+        const platform = this.MASTER_SITES.find(site => urlLower.includes(site));
+
+        if (platform) {
+            return this.getIconUrl(platform);
+        }
+
+        // Si es YouTube (que no está en MASTER_SITES de galería)
+        if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+            return this.getIconUrl('youtube');
+        }
+
+        return ''; // O un icono por defecto
+    }
 }

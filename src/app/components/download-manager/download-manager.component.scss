@@ -1,43 +1,9 @@
-/*
-.turbo-card-container {
-    --background: var(--turbo-black);
-    --color: var(--turbo-white);
-    border-radius: 12px;
-    //border: 1px solid #1a1a1a;
-    //box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    //margin: 20px 0;
-    //display: block !important;
-    /* Forzar visibilidad */
-/*
-    ion-item {
-        --background: transparent;
-        --color: var(--turbo-white);
-        --border-color: transparent;
-    }
-
-    ion-card-title {
-        color: var(--turbo-red-dark) !important;
-        font-size: 0.65rem !important;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        opacity: 0.8;
-        text-align: center;
-    }
-
-    ion-card-subtitle {
-        color: var(--turbo-grey-text);
-    }
-}
-*/
 /*Estilo de las Tarjetas (Cards) */
 ion-card {
     --background: var(--turbo-black);
     --color: var(--turbo-white);
     border-radius: 12px;
-    border: 1px solid #1a1a1a;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    margin: 20px 0;
+    border: 1px solid var(--turbo-red-dark);
 
     ion-item {
         --background: transparent;
@@ -51,7 +17,6 @@ ion-card {
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 2px;
-        opacity: 0.8;
         text-align: center;
     }
 
@@ -60,46 +25,35 @@ ion-card {
     }
 }
 
-/*Contenedor del Input Especial */
 .turbo-input-item {
-    --background: var(--turbo-black);
-    --border-radius: 8px;
     --padding-start: 15px;
     --highlight-height: 0;
     --highlight-color-focused: transparent;
     --inner-border-width: 0;
-
-    border: 1px solid #222;
+    --color: var(--turbo-white);
+    --placeholder-color: var(--turbo-grey-text);
+    --placeholder-font-weight: 300;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    border: 1px solid var(--turbo-red-dark);
     margin: 15px 0;
-    transition: all 0.2s ease;
-
-    &.item-has-focus {
-        border-color: var(--turbo-red-dark);
-    }
 
     .input-turbo-logo {
         width: 24px;
         height: 24px;
         margin-right: 12px;
-        opacity: 0.7;
-        filter: drop-shadow(0 0 2px rgba(255, 62, 62, 0.2));
     }
 }
 
 /*El Input de texto */
 .custom-input {
-    --color: var(--turbo-white);
-    --placeholder-color: var(--turbo-grey-text);
-    --placeholder-font-weight: 300;
     font-family: 'Courier New', Courier, monospace;
-    letter-spacing: 1px;
-    font-size: 0.9rem;
 }
 
 /*Spinners de carga dinámicos */
 ion-spinner {
-    width: 28px;
-    height: 28px;
+    width: 19px;
+    height: 19px;
 }
 
 .spinner-audio {

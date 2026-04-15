@@ -1,5 +1,5 @@
 @if (tauriService.state().status === 'IDLE' || tauriService.state().status === 'ANALYZING') {
-<ion-card class="turbo-card-container">
+<ion-card>
     <ion-card-header>
         <ion-card-title>It doesn't just obtain content; it Turbobtains it</ion-card-title>
     </ion-card-header>
@@ -14,8 +14,8 @@
 
         <ion-row class="ion-margin-top">
             <ion-col size="4">
-                <ion-button (keyup.enter)="analizar.emit('audio')" expand="block" class="btn-secondary"
-                    (click)="analizar.emit('audio')"
+                <ion-button (keyup.enter)="analyze.emit('audio')" expand="block" class="btn-secondary"
+                    (click)="analyze.emit('audio')"
                     [disabled]="tauriService.state().status === 'ANALYZING' || !url || !this.isVideoUrl() ">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
                     'audio') {
@@ -27,8 +27,8 @@
                 </ion-button>
             </ion-col>
             <ion-col size="4">
-                <ion-button (keyup.enter)="analizar.emit('video')" expand="block" class="btn-primary"
-                    (click)="analizar.emit('video')"
+                <ion-button (keyup.enter)="analyze.emit('video')" expand="block" class="btn-primary"
+                    (click)="analyze.emit('video')"
                     [disabled]="tauriService.state().status === 'ANALYZING' || !url || !this.isVideoUrl()">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
                     'video') {
@@ -41,8 +41,8 @@
             </ion-col>
 
             <ion-col size="4">
-                <ion-button (keyup.enter)="analizar.emit('gallery')" expand="block" class="btn-primary"
-                    (click)="analizar.emit('gallery')"
+                <ion-button (keyup.enter)="analyze.emit('gallery')" expand="block" class="btn-primary"
+                    (click)="analyze.emit('gallery')"
                     [disabled]="tauriService.state().status === 'ANALYZING' || !url || !this.isGalleryUrl()">
                     @if (tauriService.state().status === 'ANALYZING' && tauriService.state().tipoSeleccionado ===
                     'gallery') {
@@ -54,6 +54,9 @@
                 </ion-button>
             </ion-col>
         </ion-row>
+        <ion-button (click)="openSupportModal()">
+            <ion-icon name="globe-outline"></ion-icon> Supported platforms (+100)
+        </ion-button>
     </ion-card-content>
 </ion-card>
 }
@@ -110,13 +113,20 @@
                     }
                 </ion-list>
             </ion-col>
-            @if (tauriService.state().thumbnail) {
             <ion-col size="12" size-sm="4" class="ion-text-center">
-                <ion-thumbnail class="thumbnail-preview">
-                    <img [src]="tauriService.state().thumbnail" alt="Video thumbnail">
-                </ion-thumbnail>
+                <div class="thumbnail-wrapper">
+                    @if (tauriService.state().tipoSeleccionado === 'gallery' && tauriService.state().sourceLogo) {
+                    <div class="platform-logo-container">
+                        <img [src]="tauriService.state().sourceLogo" class="gallery-platform-icon" alt="Platform">
+                        <p class="source-text">Source Platform</p>
+                    </div>
+                    } @else if (tauriService.state().thumbnail) {
+                    <ion-thumbnail class="thumbnail-preview">
+                        <img [src]="tauriService.state().thumbnail" alt="Preview">
+                    </ion-thumbnail>
+                    }
+                </div>
             </ion-col>
-            }
         </ion-row>
     </ion-grid>
     <ion-footer class="ion-no-border ion-padding">

@@ -1,7 +1,8 @@
-import { Injectable, signal, OnDestroy } from '@angular/core';
+import { Injectable, signal, OnDestroy, inject, Injector } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { AppState } from '../models/download-state.model';
+import { UtilsService } from './utils.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,10 @@ export class TauriService implements OnDestroy {
   public state = this._state.asReadonly();
   private unlistenProgress?: UnlistenFn;
   private urlMemoria: string = '';
+  private injector = inject(Injector);
 
   constructor() {
+
     this.setupListeners();
     this.testGallery();
   }
@@ -22,7 +25,7 @@ export class TauriService implements OnDestroy {
       const version = await invoke('check_gallery_binary');
       console.log('Gallery-dl Version:', version);
     } catch (error) {
-      console.error('Error llamando al sidecar:', error);
+      console.error('Error calling sidecar:', error);
     }
   }
 
@@ -31,7 +34,6 @@ export class TauriService implements OnDestroy {
       this.unlistenProgress = await listen<number>('download-progress', (event) => {
         const progreso = event.payload;
 
-        // Solo pasamos a SUCCESS si es exactamente 1.0
         if (progreso === 1) {
           this._state.update(s => ({
             ...s,
@@ -39,7 +41,6 @@ export class TauriService implements OnDestroy {
             progreso: 1
           }));
         } else {
-          // Cualquier otro valor (incluyendo 0.99) mantiene el estado DOWNLOADING
           this._state.update(s => ({
             ...s,
             status: 'DOWNLOADING',
@@ -51,7 +52,7 @@ export class TauriService implements OnDestroy {
       console.error('Error:', error);
     }
   }
-  async obtenerMetadata(url: string, tipo: 'audio' | 'video') {
+  async getMetadata(url: string, tipo: 'audio' | 'video') {
     this.urlMemoria = url;
     this._state.set({ status: 'ANALYZING', tipoSeleccionado: tipo });
 
@@ -73,24 +74,30 @@ export class TauriService implements OnDestroy {
       });
     }
   }
-  async obtenerMetadataGaleria(url: string) {
+  async getMetadataGallery(url: string) {
     this.urlMemoria = url;
-    this._state.set({ status: 'ANALYZING', tipoSeleccionado: 'gallery' });
+    const utils = this.injector.get(UtilsService);
+    const logo = utils.getPlatformLogo(url);
+
+    // Reset inicial para evitar que se queden thumbnails de búsquedas anteriores
+    this._state.set({
+      status: 'ANALYZING',
+      tipoSeleccionado: 'gallery',
+      thumbnail: undefined // <--- Muy importante
+    });
 
     try {
-      // Llamamos al nuevo comando de Rust
       const metadata = await invoke<any>('check_gallery_url', { url });
 
       this._state.set({
         status: 'READY',
         tipoSeleccionado: 'gallery',
-        videoTitle: metadata.title, // "Gallery Content"
+        videoTitle: metadata.title,
+        sourceLogo: logo, // <--- Esto activará el logo en el HTML
         imageCount: metadata.count,
         mensaje: metadata.description,
         progreso: 0
       });
-
-      console.log('Metadatos de galería recibidos:', metadata);
     } catch (error) {
       this._state.set({
         status: 'ERROR',
@@ -99,15 +106,15 @@ export class TauriService implements OnDestroy {
     }
   }
 
-  async procesarUrl(url: string, tipo: 'audio' | 'video' | 'gallery') {
+  async checkUrlType(url: string, tipo: 'audio' | 'video' | 'gallery') {
     if (tipo === 'gallery') {
-      return this.obtenerMetadataGaleria(url);
+      return this.getMetadataGallery(url);
     } else {
-      return this.obtenerMetadata(url, tipo);
+      return this.getMetadata(url, tipo);
     }
   }
 
-  async iniciarDescarga() {
+  async startDownload() {
     const actual = this._state();
     if (actual.status !== 'READY') return;
 
@@ -115,16 +122,11 @@ export class TauriService implements OnDestroy {
 
     try {
       if (actual.tipoSeleccionado === 'gallery') {
-        // --- LLAMADA REAL AL COMANDO DE RUST ---
-        // Usamos invoke para llamar al comando que acabas de compilar
         const resultado = await invoke<string>('download_gallery', {
           url: this.urlMemoria
         });
 
-        console.log(resultado); // Muestra la ruta de la carpeta creada en la consola
-
-        // El comando en Rust ya emite 'download-progress' con 1.0 al terminar,
-        // pero por seguridad forzamos el estado aquí también si la promesa se resuelve.
+        console.log(resultado);
         this._state.update(s => ({
           ...s,
           status: 'SUCCESS',
@@ -132,7 +134,6 @@ export class TauriService implements OnDestroy {
         }));
 
       } else {
-        // Lógica existente para yt-dlp
         await invoke('download_video', {
           url: this.urlMemoria,
           tipo: actual.tipoSeleccionado

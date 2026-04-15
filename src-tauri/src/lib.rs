@@ -64,7 +64,7 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMeta
         
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(format!("SYSTEM_ERROR: {}", stderr.trim()))
+        Err(stderr.trim().to_string())
     }
 }
 
@@ -159,13 +159,13 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
 #[tauri::command]
 async fn check_gallery_binary(app: tauri::AppHandle) -> Result<String, String> {
     let sidecar = app.shell().sidecar("gallery-dl")
-        .map_err(|e| format!("Error al cargar sidecar: {}", e))?;
+        .map_err(|e| format!("Error loading sidecar: {}", e))?;
 
     let output = sidecar
         .args(["--version"])
         .output()
         .await
-        .map_err(|e| format!("Error de ejecución: {}", e))?;
+        .map_err(|e| format!("Execution error: {}", e))?;
 
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
@@ -179,31 +179,42 @@ async fn check_gallery_url(app: tauri::AppHandle, url: String) -> Result<Gallery
     let sidecar = app.shell().sidecar("gallery-dl")
         .map_err(|e| format!("SYSTEM_ERROR: Engine not available. ({})", e))?;
 
-    // Usamos -j para obtener JSON y --get-urls para listar lo que encontraría
+    // Añadimos User-Agent para saltar bloqueos básicos
     let output = sidecar
-        .args(["-j", "--get-urls", &url])
+        .args([
+            "-j", 
+            "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            &url
+        ])
         .output()
         .await
-        .map_err(|e| format!("EXECUTION_ERROR: Failed to analyze gallery. ({})", e))?;
+        .map_err(|e| format!("Failed to analyze gallery. ({})", e))?;
 
-    if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        
-        // gallery-dl a veces devuelve varias líneas de JSON o logs. 
-        // Vamos a contar las líneas que parecen URLs para saber cuántas imágenes hay.
-        let lines: Vec<&str> = stdout.lines().collect();
-        let image_count = lines.iter().filter(|l| l.starts_with("http")).count();
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    
+    // Filtramos líneas JSON válidas. Para Pinterest, a veces el primer objeto
+    // es un resumen del tablero/usuario y el resto son las imágenes.
+    let valid_items: Vec<serde_json::Value> = stdout
+        .lines()
+        .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
+        .collect();
 
-        // Por ahora, devolvemos una metadata simplificada
+    let total_count = valid_items.len();
+
+    if total_count > 0 {
+        // Buscamos el mejor título disponible en cualquier objeto del JSON
+        let extracted_title = valid_items.iter()
+            .find_map(|v| v["title"].as_str().or(v["gallery_title"].as_str()).or(v["description"].as_str()))
+            .unwrap_or("Pinterest Gallery");
+
         Ok(GalleryMetadata {
-            title: "Gallery Content".to_string(), // gallery-dl no siempre da el título fácil en el JSON
-            thumbnail: "".to_string(),             // Veremos cómo extraer la primera imagen luego
-            count: image_count,
-            description: format!("Found {} images available for download.", image_count)
+            title: extracted_title.to_string(),
+            thumbnail: "".to_string(), // Ignoramos thumbnail para evitar bloqueos
+            count: total_count,
+            description: format!("Found {} items in {}", total_count, extracted_title)
         })
     } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(format!("GALLERY_ERROR: {}", stderr.trim()))
+        Err("No images detected. Check if the link is public.".to_string())
     }
 }
 
@@ -219,7 +230,7 @@ async fn download_gallery(app: tauri::AppHandle, url: String) -> Result<String, 
         .unwrap_or_default()
         .as_secs();
     
-    let folder_name = format!("TurboTainer_Gallery_{}", timestamp);
+    let folder_name = format!("Turbobtainer_Gallery_{}", timestamp);
     let full_path = download_dir.join(folder_name);
 
     // 3. Crear la carpeta físicamente
