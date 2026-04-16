@@ -9,11 +9,12 @@
 [![Engine: yt-dlp](https://img.shields.io/badge/Engine-yt--dlp-red?style=flat-square&logo=youtube)](https://github.com/yt-dlp/yt-dlp)
 [![Muxer: FFmpeg](https://img.shields.io/badge/Muxer-FFmpeg-0078d7?style=flat-square&logo=ffmpeg)](https://ffmpeg.org/)
 
-Turbobtainer is a high-performance desktop application designed for seamless multimedia extraction. By bridging the gap between a modern UI and industrial-grade CLI tools, Turbobtainer provides a streamlined experience for downloading video and audio specifically from [YouTube](https://www.youtube.com/), powered by the industry-standard [yt-dlp](https://github.com/yt-dlp/yt-dlp) engine and the versatile [FFmpeg](https://www.ffmpeg.org/) multimedia framework.
+Turbobtainer is a high-performance desktop application designed for seamless multimedia extraction. By bridging the gap between a modern UI and industrial-grade CLI tools, Turbobtainer provides a streamlined experience for downloading video, audio, and image galleries from hundreds of platforms, powered by the industry-standard **yt-dlp**, **gallery-dl**, and the versatile **FFmpeg** multimedia framework. is a high-performance desktop application designed for seamless multimedia extraction. By bridging the gap between a modern UI and industrial-grade CLI tools, Turbobtainer provides a streamlined experience for downloading video and audio specifically from [YouTube](https://www.youtube.com/), powered by the industry-standard [yt-dlp](https://github.com/yt-dlp/yt-dlp) engine and the versatile [FFmpeg](https://www.ffmpeg.org/) multimedia framework.
 
 # Content
   
   - [Latest Release](#Latest-Release)
+  - [Key Features v1.2.5](#Key-Features-v125)
   - [Technology Stack](#Technology-Stack)
     - [**Core Architecture**](#Core-Architecture)
     - [**Frontend**](#Frontend)
@@ -32,7 +33,7 @@ Turbobtainer is a high-performance desktop application designed for seamless mul
 
 | File | Description |
 | :--- | :--- |
-| [`turbobtainer_1.1.5_x64.msi`](https://github.com/1337KR3W/turbobtainer/releases/download/v1.1.5/turbobtainer_1.1.5_x64_en-US.msi) | Windows Managed Installer (64-bit). Includes automated resource mapping and system integration. |
+| [`turbobtainer_1.2.5_x64.msi`](https://github.com/1337KR3W/turbobtainer/releases/download/v1.2.5/turbobtainer_1.2.5_x64_en-US.msi) | Windows Managed Installer (64-bit). Includes automated resource mapping and system integration. |
 
 ---
 
@@ -54,6 +55,7 @@ Turbobtainer leverages a robust "Deep Tech" stack to ensure memory safety, speed
 
 ### **Engines & Sidecars**
 * **[yt-dlp](https://github.com/yt-dlp/yt-dlp):** A feature-rich command-line audio/video downloader.
+* **[gallery-dl](https://github.com/mikf/gallery-dl):** High-performance engine for image galleries and social media content.
 * **[FFmpeg](https://ffmpeg.org/):** Used for muxing video/audio streams and encoding formats.
 
 ### **Deployment & Distribution**
@@ -62,6 +64,15 @@ Turbobtainer leverages a robust "Deep Tech" stack to ensure memory safety, speed
 
 ---
 
+## Key Features v1.2.5
+
+* **Gallery Extraction:** Full support for image-based platforms via gallery-dl integration.
+* **ASCII Backgrounds:** Dynamic, randomized ASCII art backgrounds upon startup.
+* **Real-time Progress:** Live progress tracking for both single files and multi-item galleries.
+* **Shared Binary Logic:** Optimized architecture where multiple engines share a single FFmpeg instance, reducing installation size.
+* **Smart Metadata Analysis:** Preview titles, thumbnails, and estimated sizes before committing to a download.
+
+---
 ## How It Works (The Sidecar Pattern)
 
 Turbobtainer uses a **Sidecar Pattern** to execute external binaries without requiring manual installation from the user:
