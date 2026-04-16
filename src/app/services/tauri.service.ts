@@ -79,11 +79,10 @@ export class TauriService implements OnDestroy {
     const utils = this.injector.get(UtilsService);
     const logo = utils.getPlatformLogo(url);
 
-    // Reset inicial para evitar que se queden thumbnails de búsquedas anteriores
     this._state.set({
       status: 'ANALYZING',
       tipoSeleccionado: 'gallery',
-      thumbnail: undefined // <--- Muy importante
+      thumbnail: undefined
     });
 
     try {
@@ -93,7 +92,7 @@ export class TauriService implements OnDestroy {
         status: 'READY',
         tipoSeleccionado: 'gallery',
         videoTitle: metadata.title,
-        sourceLogo: logo, // <--- Esto activará el logo en el HTML
+        sourceLogo: logo,
         imageCount: metadata.count,
         mensaje: metadata.description,
         progreso: 0
@@ -122,8 +121,10 @@ export class TauriService implements OnDestroy {
 
     try {
       if (actual.tipoSeleccionado === 'gallery') {
+        const totalItems = actual.imageCount || 0;
         const resultado = await invoke<string>('download_gallery', {
-          url: this.urlMemoria
+          url: this.urlMemoria,
+          totalItems: totalItems
         });
 
         console.log(resultado);

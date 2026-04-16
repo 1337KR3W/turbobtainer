@@ -17,6 +17,15 @@
 <ion-content class="ion-padding">
     <ion-grid fixed>
         <ion-row class="ion-justify-content-center">
+            <ion-col size="3" size-sm="2" size-md="1.5">
+
+                <div class="platform-item">
+                    <div class="icon-box">
+                        <img [src]="getIconUrl('youtube')" alt="YouTube" loading="lazy">
+                    </div>
+                    <span class="platform-name">{{ 'youtube'.split('.')[0] }}</span>
+                </div>
+            </ion-col>
             @for (sitio of sitiosSoportados; track $index) {
             <ion-col size="3" size-sm="2" size-md="1.5">
                 <div class="platform-item">
@@ -27,6 +36,7 @@
                 </div>
             </ion-col>
             }
+
 
         </ion-row>
     </ion-grid>

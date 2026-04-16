@@ -78,6 +78,12 @@ export class UtilsService {
             return this.getIconUrl('youtube');
         }
 
-        return ''; // O un icono por defecto
+        try {
+            const domain = new URL(url).hostname.replace('www.', '');
+            return this.getIconUrl(domain);
+        } catch {
+            return '';
+        }
+
     }
 }
