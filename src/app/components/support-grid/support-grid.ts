@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { IonContent, IonGrid, IonRow, IonCol, IonIcon, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonSearchbar } from "@ionic/angular/standalone";
 import { UtilsService } from '../../services/utils.service';
 @Component({
@@ -8,23 +8,22 @@ import { UtilsService } from '../../services/utils.service';
   templateUrl: './support-grid.html',
   styleUrl: './support-grid.scss',
 })
-export class SupportGrid extends UtilsService {
+export class SupportGrid {
 
-  public sitiosSoportados: string[] = [...this.MASTER_SITES];
+  public readonly utils = inject(UtilsService);
+  public sitiosSoportados: string[] = [...this.utils.MASTER_SITES];
 
   constructor() {
-    super();
-    this.initializeIcons();
-    console.log(this.MASTER_SITES.length);
+    this.utils.initializeIcons();
   }
 
   filterSites(event: any) {
     const query = event.target.value.toLowerCase().trim();
     if (!query) {
-      this.sitiosSoportados = [...this.MASTER_SITES];
+      this.sitiosSoportados = [...this.utils.MASTER_SITES];
       return;
     }
-    this.sitiosSoportados = this.MASTER_SITES.filter(s => s.toLowerCase().includes(query));
+    this.sitiosSoportados = this.utils.MASTER_SITES.filter(s => s.toLowerCase().includes(query));
   }
 
   handleImageError(event: any) {
@@ -32,7 +31,7 @@ export class SupportGrid extends UtilsService {
   }
 
   dismiss() {
-    this.modalCtrl.dismiss();
+    this.utils.modalCtrl.dismiss();
   }
 
 }

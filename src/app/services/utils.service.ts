@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { addIcons } from 'ionicons';
 import {
     close,
@@ -12,11 +12,13 @@ import {
     checkmarkDoneOutline,
     cloudDownloadOutline,
     logoYoutube,
-    imageOutline
+    imageOutline,
+    checkmarkCircle
 } from 'ionicons/icons';
 import { TauriService } from './tauri.service';
 import { ModalController } from '@ionic/angular/standalone';
 import { SUPPORTED_PLATFORMS } from '../models/supported-platforms.model';
+import { ASCII_DESIGNS } from '../models/background-ascii-art';
 
 @Injectable({
     providedIn: 'root'
@@ -27,7 +29,10 @@ export class UtilsService {
     public readonly modalCtrl = inject(ModalController);
 
     public readonly MASTER_SITES = SUPPORTED_PLATFORMS;
-
+    public currentAscii = signal<string>(ASCII_DESIGNS[0]);
+    constructor() {
+        this.setRandomAscii(); // Inicialización
+    }
     public initializeIcons() {
         addIcons({
             'close': close,
@@ -42,6 +47,7 @@ export class UtilsService {
             'cloudDownloadOutline': cloudDownloadOutline,
             'logoYoutube': logoYoutube,
             'image-outline': imageOutline,
+            'checkmark-circle': checkmarkCircle
         });
     }
 
@@ -65,15 +71,11 @@ export class UtilsService {
     public getPlatformLogo(url: string): string {
         if (!url) return '';
         const urlLower = url.toLowerCase();
-
-        // Buscamos cuál de nuestras plataformas soportadas está en la URL
         const platform = this.MASTER_SITES.find(site => urlLower.includes(site));
-
         if (platform) {
             return this.getIconUrl(platform);
         }
 
-        // Si es YouTube (que no está en MASTER_SITES de galería)
         if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
             return this.getIconUrl('youtube');
         }
@@ -84,6 +86,10 @@ export class UtilsService {
         } catch {
             return '';
         }
+    }
 
+    public setRandomAscii() {
+        const randomIndex = Math.floor(Math.random() * ASCII_DESIGNS.length);
+        this.currentAscii.set(ASCII_DESIGNS[randomIndex]);
     }
 }

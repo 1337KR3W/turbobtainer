@@ -1,14 +1,14 @@
 <ion-header class="ion-no-border">
     <ion-toolbar>
-        <ion-title>Supported platforms</ion-title>
+        <ion-title>SUPPORTED PLATFORMS</ion-title>
         <ion-buttons slot="end">
-            <ion-button (click)="dismiss()">
+            <ion-button type="button" (keyup.enter)="dismiss()" (click)="dismiss()">
                 <ion-icon slot="icon-only" name="close"></ion-icon>
             </ion-button>
         </ion-buttons>
     </ion-toolbar>
-    <ion-toolbar>
-        <ion-searchbar placeholder="Search site (ej: Instagram)" (ionInput)="filterSites($event)"
+    <ion-toolbar class="search-bar">
+        <ion-searchbar class="custom-input" placeholder="Search site (ex: Pinterest)" (ionInput)="filterSites($event)"
             (ionClear)="filterSites($event)" mode="ios" show-clear-button="always">
         </ion-searchbar>
     </ion-toolbar>
@@ -21,7 +21,7 @@
 
                 <div class="platform-item">
                     <div class="icon-box">
-                        <img [src]="getIconUrl('youtube')" alt="YouTube" loading="lazy">
+                        <img [src]="this.utils.getIconUrl('youtube')" alt="YouTube" loading="lazy">
                     </div>
                     <span class="platform-name">{{ 'youtube'.split('.')[0] }}</span>
                 </div>
@@ -30,7 +30,7 @@
             <ion-col size="3" size-sm="2" size-md="1.5">
                 <div class="platform-item">
                     <div class="icon-box">
-                        <img [src]="getIconUrl(sitio)" [alt]="sitio" loading="lazy">
+                        <img [src]="this.utils.getIconUrl(sitio)" [alt]="sitio" loading="lazy">
                     </div>
                     <span class="platform-name">{{ sitio.split('.')[0] }}</span>
                 </div>

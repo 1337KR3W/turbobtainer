@@ -1,3 +1,27 @@
+ion-header {
+    border-bottom: 1px solid var(--turbo-red-dark);
+
+}
+
+ion-toolbar {
+    --background: var(--ion-color-primary);
+
+
+}
+
+ion-title {
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--turbo-red-vibrant);
+    text-shadow: 0 0 10px var(--turbo-red-glow);
+}
+
+.custom-input {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+
+
 .platform-item {
     display: flex;
     flex-direction: column;

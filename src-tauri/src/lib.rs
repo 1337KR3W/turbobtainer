@@ -180,8 +180,7 @@ async fn check_gallery_url(app: tauri::AppHandle, url: String) -> Result<Gallery
     let sidecar = app.shell().sidecar("gallery-dl")
         .map_err(|e| format!("Engine Error: {}", e))?;
 
-    // Eliminamos los bloqueos de API generales para que Pinterest vuelva a la vida
-    // Pero mantenemos el User-Agent para evitar bloqueos básicos
+    // Mantenemos el User-Agent para evitar bloqueos básicos
     let output = sidecar
         .args([
             "-j",
@@ -195,8 +194,7 @@ async fn check_gallery_url(app: tauri::AppHandle, url: String) -> Result<Gallery
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
-    // IMPORTANTE: Mira tu terminal de VS Code / CMD. Veremos qué escupe gallery-dl.
-    println!("DEBUG RAW STDOUT: {}", stdout);
+    //println!("DEBUG RAW STDOUT: {}", stdout);
     if !stderr.is_empty() { println!("DEBUG STDERR: {}", stderr); }
 
     let mut urls_found = Vec::new();
@@ -210,7 +208,7 @@ async fn check_gallery_url(app: tauri::AppHandle, url: String) -> Result<Gallery
         }
     }
 
-    // Si después de las líneas sigue vacío, intentamos el bloque entero (Pinterest)
+    // Si después de las líneas sigue vacío, intentamos el bloque entero
     if urls_found.is_empty() {
         if let Ok(json_val) = serde_json::from_str::<serde_json::Value>(&stdout) {
             extract_recursive(&json_val, &mut urls_found, &mut title);
@@ -320,7 +318,6 @@ async fn download_gallery(app: tauri::AppHandle, url: String, total_items: usize
 
     fs::create_dir_all(&full_path).map_err(|e| format!("Folder Error: {}", e))?;
 
-    // Importante: Usamos spawn() en lugar de output()
     let sidecar = app.shell().sidecar("gallery-dl")
         .map_err(|e| format!("Engine Error: {}", e))?;
 
@@ -331,12 +328,11 @@ async fn download_gallery(app: tauri::AppHandle, url: String, total_items: usize
             "-d", &full_path.to_string_lossy(), 
             &url
         ])
-        .spawn() // <--- Cambiado de .output() a .spawn()
+        .spawn()
         .map_err(|e| format!("Download Execution Error: {}", e))?;
 
     let mut downloaded_count = 0;
 
-    // Escuchamos los eventos del proceso en tiempo real
     use tauri_plugin_shell::process::CommandEvent;
     
     while let Some(event) = rx.recv().await {

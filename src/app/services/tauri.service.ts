@@ -12,7 +12,7 @@ export class TauriService implements OnDestroy {
   public state = this._state.asReadonly();
   private unlistenProgress?: UnlistenFn;
   private urlMemoria: string = '';
-  private injector = inject(Injector);
+  private readonly injector = inject(Injector);
 
   constructor() {
 

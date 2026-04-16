@@ -112,3 +112,34 @@ a {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--turbo-red-vibrant);
 }
+
+/* Definimos la capa del fondo ASCII */
+.ascii-bg-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: -1;
+    background-color: #121212;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.ascii-art {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.6rem;
+    color: var(--turbo-red-dark);
+    line-height: 1.1;
+    margin: 0;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* IMPORTANTE: Hacer que ion-content sea transparente */
+ion-content {
+    --background: transparent;
+}
