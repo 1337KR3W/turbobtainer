@@ -1,13 +1,15 @@
 <img width="746" height="176" alt="banner" src="https://github.com/user-attachments/assets/12d94fdd-cb1d-4ff1-821e-cd97c24533c0" />
 
-[![Version](https://img.shields.io/badge/Version-1.1.0-blue?style=flat-square&logo=githubactions)](https://github.com/1337KR3W/turbobtainer/releases)
+[![Version](https://img.shields.io/badge/Version-1.2.5-blue?style=flat-square&logo=githubactions)](https://github.com/1337KR3W/turbobtainer/releases)
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri-24c8db?style=flat-square&logo=tauri)](https://tauri.app/)
 [![Node.js](https://img.shields.io/badge/Runtime-Node.js-339933?style=flat-square&logo=node.js)](https://nodejs.org/)
 [![Angular](https://img.shields.io/badge/Frontend-Angular%2017-dd0031?style=flat-square&logo=angular)](https://angular.io/)
 [![Ionic](https://img.shields.io/badge/UI%20Framework-Ionic-3880ff?style=flat-square&logo=ionic)](https://ionicframework.com/)
 [![Rust](https://img.shields.io/badge/Backend-Rust-000000?style=flat-square&logo=rust)](https://www.rust-lang.org/)
-[![Engine: yt-dlp](https://img.shields.io/badge/Engine-yt--dlp-red?style=flat-square&logo=youtube)](https://github.com/yt-dlp/yt-dlp)
 [![Muxer: FFmpeg](https://img.shields.io/badge/Muxer-FFmpeg-0078d7?style=flat-square&logo=ffmpeg)](https://ffmpeg.org/)
+[![Engine: yt-dlp](https://img.shields.io/badge/Engine-yt--dlp-red?style=flat-square&logo=youtube)](https://github.com/yt-dlp/yt-dlp)
+[![Engine: gallery-dl](https://img.shields.io/badge/Engine-gallery--dl-5e473a?style=flat-square&logo=icloud)](https://github.com/mikf/gallery-dl)
+
 
 Turbobtainer is a high-performance desktop application designed for seamless multimedia extraction. By bridging the gap between a modern UI and industrial-grade CLI tools, Turbobtainer provides a streamlined experience for downloading video, audio, and image galleries from hundreds of platforms, powered by the industry-standard **yt-dlp**, **gallery-dl**, and the versatile **FFmpeg** multimedia framework. is a high-performance desktop application designed for seamless multimedia extraction. By bridging the gap between a modern UI and industrial-grade CLI tools, Turbobtainer provides a streamlined experience for downloading video and audio specifically from [YouTube](https://www.youtube.com/), powered by the industry-standard [yt-dlp](https://github.com/yt-dlp/yt-dlp) engine and the versatile [FFmpeg](https://www.ffmpeg.org/) multimedia framework.
 
