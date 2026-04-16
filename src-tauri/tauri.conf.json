@@ -38,9 +38,6 @@
       "bin/ffmpeg",
       "bin/gallery-dl"
     ],
-    "resources": [
-      "bin/ffmpeg-x86_64-pc-windows-msvc.exe",
-      "bin/gallery-dl-x86_64-pc-windows-msvc.exe"
-    ]
+    "resources": []
   }
 }

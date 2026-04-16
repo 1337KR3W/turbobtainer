@@ -67,36 +67,22 @@ async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMeta
         Err(stderr.trim().to_string())
     }
 }
-
 #[tauri::command]
 async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Result<String, String> {
     
-    let target_triple = tauri::utils::platform::target_triple().unwrap_or_default();
-    let ffmpeg_file = format!("bin/ffmpeg-{}.exe", target_triple);
+    // --- 1. PREPARAR EL SIDECAR DE FFmpeg ---
+    // En lugar de buscar un archivo en una carpeta, le pedimos a Tauri su sidecar oficial.
+    let ffmpeg_sidecar = app.shell().sidecar("ffmpeg")
+        .map_err(|e| format!("FFmpeg Sidecar Error: {}", e))?;
 
-    // El PathResolver es la única autoridad fiable para encontrar archivos empaquetados.
-    // BaseDirectory::Resource buscará en 'src-tauri' en dev y en la carpeta de instalación en prod.
-    let ffmpeg_path = app.path()
-        .resolve(&ffmpeg_file, tauri::path::BaseDirectory::Resource)
-        .map_err(|e| format!("Infraestructure Error: Conversion engine not found ({})", e))?;
-
-    // 3. Verificación de integridad
-    if !ffmpeg_path.exists() {
-        return Err(format!(
-            "System error: FFmpeg not found in: {}", 
-            ffmpeg_path.display()
-        ).into());
-    }
-
-    let ffmpeg_str = ffmpeg_path.to_string_lossy().to_string();
-
-    // --- DIRECTORIO DE DESCARGA ---
+    // --- 2. DIRECTORIO DE DESCARGA ---
     let download_dir = app.path().download_dir()
-    .map_err(|e| format!("Download path not fount: {}", e))?;
+        .map_err(|e| format!("Download path not found: {}", e))?;
 
     let output_str = download_dir.join("%(title).150s_Turbobtainer_%(epoch)s.%(ext)s")
-    .to_string_lossy().to_string();
+        .to_string_lossy().to_string();
 
+    // --- 3. CONFIGURAR ARGUMENTOS ---
     let mut args = vec![
         "--newline",
         "--progress",
@@ -104,7 +90,9 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
         "--no-playlist",
         "--no-overwrites",
         "-o", &output_str,
-        "--ffmpeg-location", &ffmpeg_str,
+        // IMPORTANTE: Al ser FFmpeg un sidecar, simplemente pasamos el nombre
+        // que definimos en tauri.conf.json. Tauri se encarga de inyectar la ruta real.
+        "--ffmpeg-location", "ffmpeg", 
     ];
 
     if tipo == "audio" {
@@ -118,7 +106,7 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
 
     args.push(&url);
 
-    // Ejecutamos yt-dlp como sidecar nativo
+    // --- 4. EJECUCIÓN ---
     let (mut rx, _child) = app.shell()
         .sidecar("yt-dlp")
         .map_err(|e| format!("Sidecar error yt-dlp: {}", e))?
@@ -126,8 +114,10 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
         .spawn()
         .map_err(|e| format!("Error initializing process...: {}", e))?;
 
+    // ... (Tu lógica de escucha de eventos se mantiene igual)
     tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
+            // ... resto del bucle while igual ...
             match event {
                 tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
                     let out = String::from_utf8_lossy(&line);
