@@ -2,6 +2,7 @@ use tauri_plugin_shell::ShellExt;
 use tauri::{Emitter, Manager};
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
+mod anime;
 
 #[derive(serde::Serialize)]
 struct VideoMetadata {
