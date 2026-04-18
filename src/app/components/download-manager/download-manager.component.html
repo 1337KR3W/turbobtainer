@@ -7,13 +7,13 @@
     <ion-card-content>
         <ion-item lines="none" class="turbo-input-item">
             <img src="assets/input-logo.png" slot="start" class="input-turbo-logo" alt="Logo">
-            <ion-input [ngModel]="url" (ngModelChange)="urlChange.emit($event)"
+            <ion-input [ngModel]="url" (ngModelChange)="onInputChange($event)"
                 placeholder="Example: https://www.youtube.com/..." class="custom-input">
             </ion-input>
         </ion-item>
 
         <ion-row class="ion-margin-top">
-            <ion-col size="4">
+            <ion-col size="3">
                 <ion-button (keyup.enter)="analyze.emit('audio')" expand="block" class="btn-secondary"
                     (click)="analyze.emit('audio')"
                     [disabled]="tauri.state().status === 'ANALYZING' || !url || !this.isVideoUrl() ">
@@ -26,7 +26,7 @@
                     }
                 </ion-button>
             </ion-col>
-            <ion-col size="4">
+            <ion-col size="3">
                 <ion-button (keyup.enter)="analyze.emit('video')" expand="block" class="btn-primary"
                     (click)="analyze.emit('video')"
                     [disabled]="tauri.state().status === 'ANALYZING' || !url || !this.isVideoUrl()">
@@ -40,7 +40,7 @@
                 </ion-button>
             </ion-col>
 
-            <ion-col size="4">
+            <ion-col size="3">
                 <ion-button (keyup.enter)="analyze.emit('gallery')" expand="block" class="btn-primary"
                     (click)="analyze.emit('gallery')"
                     [disabled]="tauri.state().status === 'ANALYZING' || !url || !this.isGalleryUrl()">
@@ -52,7 +52,14 @@
                     Gallery
                     }
                 </ion-button>
-                <ion-button (click)="pruebaAnime()">PROBAR RUST ANIME</ion-button>
+            </ion-col>
+
+            <ion-col size="3">
+                <ion-button expand="block" class="btn-primary" (click)="viewMode = 'SEARCH'"
+                    [disabled]="animeService.results().length === 0">
+                    <ion-icon name="tv-outline" slot="start"></ion-icon>
+                    Anime ({{ animeService.results().length }})
+                </ion-button>
             </ion-col>
 
         </ion-row>
@@ -64,19 +71,49 @@
         </ion-button>
     </ion-card-content>
 </ion-card>
-<div *ngIf="animeService.state().currentStream as stream" class="video-container">
-    <h3 class="text-white">Reproduciendo desde: {{ stream.server }}</h3>
+
+<div *ngIf="animeService.results().length > 0 && viewMode === 'SEARCH'" class="anime-results">
+    <ion-list bg-transparent>
+        <ion-item *ngFor="let anime of animeService.results()" (click)="selectAnime(anime)" button lines="none"
+            class="anime-item">
+            <ion-thumbnail slot="start">
+                <img [src]="anime.thumbnail" />
+            </ion-thumbnail>
+            <ion-label>
+                <h2>{{ anime.title }}</h2>
+                <p>Click to view episodes</p>
+            </ion-label>
+        </ion-item>
+    </ion-list>
+</div>
+
+<div *ngIf="viewMode === 'EPISODES'" class="episodes-container">
+    <div class="header-nav">
+        <ion-button fill="clear" (click)="goBack()">
+            <ion-icon name="arrow-back-outline" slot="start"></ion-icon> Back to Search
+        </ion-button>
+        <h3 class="text-white">{{ selectedAnime?.title }}</h3>
+    </div>
+
+    <div class="episodes-grid">
+        <ion-button *ngFor="let ep of animeService.episodes()" (click)="playEpisode(ep)" class="ep-button"
+            fill="outline">
+            Cap {{ ep.number }}
+        </ion-button>
+    </div>
+</div>
+
+<div *ngIf="viewMode === 'PLAYER' && animeService.state().currentStream as stream" class="video-container">
+    <ion-button fill="clear" (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="start"></ion-icon> Back to Episodes
+    </ion-button>
+
+    <h3 class="text-white">Reproduciendo: {{ selectedAnime?.title }} - Cap</h3>
 
     <div class="iframe-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; background: #000;">
         <iframe [src]="getSafeUrl()"
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
             allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-    </div>
-
-    <div class="mt-4">
-        <a [href]="stream.url" target="_blank" class="text-blue-400 underline">
-            Abrir en navegador externo (Link directo)
-        </a>
     </div>
 </div>
 }

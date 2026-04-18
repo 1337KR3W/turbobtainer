@@ -25,6 +25,8 @@ export class DownloadManagerComponent {
   public animeService = inject(AnimeService);
   private readonly sanitizer = inject(DomSanitizer);
   public readonly supportedPlatforms = this.utils.MASTER_SITES;
+  public viewMode: 'SEARCH' | 'EPISODES' | 'PLAYER' = 'SEARCH';
+  public selectedAnime: any = null;
 
   @Input() url: string = '';
   @Output() urlChange = new EventEmitter<string>();
@@ -113,6 +115,58 @@ export class DownloadManagerComponent {
   }
   setRandomBackGround() {
     this.utils.setRandomAscii();
+  }
+
+  // Modificamos el método de búsqueda
+  async handleSearch(event: any) {
+    const query = event.target.value;
+    if (query && query.length > 2 && !query.startsWith('http')) {
+      // Si no es una URL, buscamos anime
+      await this.animeService.searchAnime(query);
+    }
+  }
+
+  // Método para seleccionar un Anime y ver sus capítulos
+  async selectAnime(anime: any) {
+    this.selectedAnime = anime;
+    this.viewMode = 'EPISODES';
+    await this.animeService.getEpisodes(anime.url);
+  }
+
+  // Método para reproducir un episodio
+  async playEpisode(episode: any) {
+    this.viewMode = 'PLAYER';
+    await this.animeService.getStream(episode.url);
+  }
+
+  // Volver atrás
+  goBack() {
+    if (this.viewMode === 'PLAYER') this.viewMode = 'EPISODES';
+    else if (this.viewMode === 'EPISODES') {
+      this.viewMode = 'SEARCH';
+      this.animeService.reset(); // Opcional: limpiar episodios
+    }
+  }
+
+  async onInputChange(value: string) {
+    this.url = value;
+    this.urlChange.emit(value);
+
+    // 1. Si el usuario borra el texto, reseteamos todo el estado de anime
+    if (!value || value.trim().length === 0) {
+      this.animeService.reset();
+      this.viewMode = 'SEARCH'; // Volvemos al modo búsqueda inicial
+      return;
+    }
+
+    // 2. Solo buscamos si hay más de 2 caracteres y no es una URL
+    if (value.length > 2 && !value.startsWith('http')) {
+      await this.animeService.searchAnime(value);
+    }
+    // 3. Si es una URL, quizás quieras limpiar los resultados de anime para no confundir
+    else if (value.startsWith('http')) {
+      this.animeService.reset();
+    }
   }
 
 }

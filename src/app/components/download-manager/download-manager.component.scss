@@ -171,3 +171,26 @@ ion-progress-bar {
         }
     }
 }
+
+.episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 10px;
+    padding: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.anime-item {
+    --background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 8px;
+    border-radius: 8px;
+    --color: white;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #333;
+}
