@@ -14,7 +14,8 @@ import {
     logoYoutube,
     imageOutline,
     checkmarkCircle,
-    tvOutline
+    tvOutline,
+    arrowBackOutline
 } from 'ionicons/icons';
 import { TauriService } from './tauri.service';
 import { ModalController } from '@ionic/angular/standalone';
@@ -49,7 +50,8 @@ export class UtilsService {
             'logoYoutube': logoYoutube,
             'image-outline': imageOutline,
             'checkmark-circle': checkmarkCircle,
-            'tv-outline': tvOutline
+            'tv-outline': tvOutline,
+            'arrow-back-outline': arrowBackOutline
         });
     }
 

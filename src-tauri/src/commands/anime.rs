@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
-use scraper::{Html, Selector};
-use reqwest::header::USER_AGENT;
 use regex::Regex;
+use reqwest::header::USER_AGENT;
+use scraper::{Html, Selector};
+use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Anime {
@@ -26,10 +26,10 @@ pub struct StreamSource {
 
 #[tauri::command]
 pub async fn search_anime(query: String) -> Result<Vec<Anime>, String> {
+    println!(">>> RUST RECIBIÓ BÚSQUEDA: {}", query); // Mira la consola de la terminal
     let url = format!("https://www3.animeflv.net/browse?q={}", query.replace(" ", "+"));
     let client = reqwest::Client::new();
 
-    // Hacemos la petición fingiendo ser un navegador moderno
     let response = client
         .get(&url)
         .header(USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
@@ -40,10 +40,8 @@ pub async fn search_anime(query: String) -> Result<Vec<Anime>, String> {
         .await
         .map_err(|e| format!("Read error: {}", e))?;
 
-    // Parseamos el HTML
     let document = Html::parse_document(&response);
     
-    // Selectores CSS
     let item_selector = Selector::parse("ul.ListAnimes li article.Anime").unwrap();
     let title_selector = Selector::parse("h3.Title").unwrap();
     let link_selector = Selector::parse("a").unwrap();
@@ -77,7 +75,7 @@ pub async fn search_anime(query: String) -> Result<Vec<Anime>, String> {
                 title,
                 url: link,
                 thumbnail,
-                description: None, // La descripción suele requerir entrar en la ficha técnica
+                description: None,
             });
         }
     }
@@ -98,7 +96,6 @@ pub async fn get_anime_episodes(url: String) -> Result<Vec<Episode>, String> {
         .await
         .map_err(|e| e.to_string())?;
 
-    // Regex para capturar el array de episodios: var episodes = [[1,1],[2,2],...];
     let re_episodes = Regex::new(r"var episodes = (\[\[.*\]\]);").unwrap();
     
     // Capturamos el ID de la serie para reconstruir la URL (AnimeFLV lo necesita)
@@ -109,7 +106,6 @@ pub async fn get_anime_episodes(url: String) -> Result<Vec<Episode>, String> {
 
     if let Some(caps) = re_episodes.captures(&response) {
         let json_data = &caps[1];
-        // Parseamos el string como un array de arrays: [[numero_ep, id_ep], ...]
         let raw_episodes: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_data)
             .map_err(|e| format!("JSON Error: {}", e))?;
 
@@ -127,9 +123,6 @@ pub async fn get_anime_episodes(url: String) -> Result<Vec<Episode>, String> {
             }
         }
     }
-
-    // Los episodios en el script vienen del último al primero, 
-    // les damos la vuelta para que el 1 sea el primero.
     episodes_list.reverse();
 
     Ok(episodes_list)
@@ -153,11 +146,8 @@ pub async fn get_stream_link(url: String) -> Result<StreamSource, String> {
         let iframe_url = s["code"].as_str().unwrap_or("");
 
         if server_id == "sw" {
-            // --- NUEVA ESTRATEGIA: EXTRAER ID ---
-            // El ID está al final de: https://streamwish.to/e/vi3iu795r3h6
             let video_id = iframe_url.split('/').last().unwrap_or("");
             
-            // Intentamos construir el link directo que suelen usar sus CDNs
             // Nota: Este patrón cambia a veces, pero es el más estable
             let direct_url = format!("https://awentub.com/stream/{}/master.m3u8", video_id);
 

@@ -72,121 +72,11 @@
     </ion-card-content>
 </ion-card>
 
-<div *ngIf="animeService.results().length > 0 && viewMode === 'SEARCH'" class="anime-results">
-    <ion-list bg-transparent>
-        <ion-item *ngFor="let anime of animeService.results()" (click)="selectAnime(anime)" button lines="none"
-            class="anime-item">
-            <ion-thumbnail slot="start">
-                <img [src]="anime.thumbnail" />
-            </ion-thumbnail>
-            <ion-label>
-                <h2>{{ anime.title }}</h2>
-                <p>Click to view episodes</p>
-            </ion-label>
-        </ion-item>
-    </ion-list>
-</div>
-
-<div *ngIf="viewMode === 'EPISODES'" class="episodes-container">
-    <div class="header-nav">
-        <ion-button fill="clear" (click)="goBack()">
-            <ion-icon name="arrow-back-outline" slot="start"></ion-icon> Back to Search
-        </ion-button>
-        <h3 class="text-white">{{ selectedAnime?.title }}</h3>
-    </div>
-
-    <div class="episodes-grid">
-        <ion-button *ngFor="let ep of animeService.episodes()" (click)="playEpisode(ep)" class="ep-button"
-            fill="outline">
-            Cap {{ ep.number }}
-        </ion-button>
-    </div>
-</div>
-
-<app-video-player *ngIf="viewMode === 'PLAYER'" [stream]="animeService.state().currentStream"
-    [animeTitle]="selectedAnime?.title" [episodeNumber]="selectedEpisode?.number" (back)="goBack()">
-</app-video-player>
 }
 
 @else if (tauri.state().status === 'READY') {
-<ion-card class="turbo-card-container">
-    <ion-grid fixed class="ion-no-padding">
-        <ion-row class="ion-align-items-start ion-padding">
-            <ion-col size="12" size-sm="8">
-                <ion-list lines="none" class="metadata-list">
-
-                    @if (tauri.state().videoTitle) {
-                    <ion-item>
-                        <ion-label>Title:
-                            <strong>{{tauri.state().videoTitle}}</strong>
-                        </ion-label>
-                    </ion-item>
-                    }
-                    @if (tauri.state().tipoSeleccionado) {
-                    <ion-item>
-                        <ion-label>Format:
-                            <strong>{{ tauri.state().tipoSeleccionado | uppercase}}</strong>
-                        </ion-label>
-                    </ion-item>
-                    }
-                    @if (tauri.state().duration) {
-                    <ion-item>
-                        <ion-label>Duration:
-                            <strong>{{ tauri.state().duration }}</strong>
-                        </ion-label>
-                    </ion-item>
-                    }
-                    @if (tauri.state().size) {
-                    <ion-item>
-                        <ion-label>Size:
-                            <strong>{{ tauri.state().size }}</strong>
-                        </ion-label>
-                    </ion-item>
-                    }
-                    @if (tauri.state().imageCount) {
-                    <ion-item>
-                        <ion-label>Images found:
-                            <strong>{{ tauri.state().imageCount }} items</strong>
-                        </ion-label>
-                    </ion-item>
-                    }
-
-                    @if (tauri.state().mensaje && tauri.state().tipoSeleccionado === 'gallery') {
-                    <ion-item>
-                        <ion-label class="ion-text-wrap">
-                            <small>{{ tauri.state().mensaje }}</small>
-                        </ion-label>
-                    </ion-item>
-                    }
-                </ion-list>
-            </ion-col>
-            <ion-col size="12" size-sm="4" class="ion-text-center">
-                <div class="thumbnail-wrapper">
-                    @if (tauri.state().tipoSeleccionado === 'gallery' && tauri.state().sourceLogo) {
-                    <div class="platform-logo-container">
-                        <img [src]="tauri.state().sourceLogo" class="gallery-platform-icon" alt="Platform">
-                        <p class="source-text">Source Platform</p>
-                    </div>
-                    } @else if (tauri.state().thumbnail) {
-                    <ion-thumbnail class="thumbnail-preview">
-                        <img [src]="tauri.state().thumbnail" alt="Preview">
-                    </ion-thumbnail>
-                    }
-                </div>
-            </ion-col>
-        </ion-row>
-    </ion-grid>
-    <ion-footer class="ion-no-border ion-padding">
-        <ion-button type="button" (keyup.enter)="download.emit()" expand="block" class="btn-primary"
-            (click)="download.emit()">
-            <ion-icon name="cloud-download-outline" slot="start"></ion-icon> Turbobtain
-        </ion-button>
-        <ion-button type="button" (keyup.enter)="cancelDld.emit()" fill="clear" expand="block" color="medium"
-            (click)="cancelDld.emit()">
-            <ion-icon name="trash-outline" slot="start"></ion-icon> Cancel
-        </ion-button>
-    </ion-footer>
-</ion-card>
+<app-metadata-card [state]="tauri.state()" (download)="download.emit()" (cancel)="cancelDld.emit()">
+</app-metadata-card>
 }
 
 @else if (tauri.state().status === 'DOWNLOADING') {
@@ -250,4 +140,62 @@
         Retry
     </ion-button>
 </ion-card>
+}
+
+@if (viewMode === 'SEARCH' && animeService.results().length > 0) {
+<div class="anime-results-container ion-padding-top">
+    <h3 class="ion-padding-horizontal text-white">Search results</h3>
+    <ion-grid>
+        <ion-row>
+            @for (anime of animeService.results(); track anime.url) {
+            <ion-col size="6" size-md="4" size-lg="3">
+                <ion-card button (click)="selectAnime(anime)" class="anime-item-card">
+                    <img [src]="anime.thumbnail" class="anime-thumb" alt="thumbnail" />
+                    <ion-card-header class="ion-no-padding ion-padding-vertical">
+                        <ion-card-subtitle class="ion-text-center">{{ anime.title }}</ion-card-subtitle>
+                    </ion-card-header>
+                </ion-card>
+            </ion-col>
+            }
+        </ion-row>
+    </ion-grid>
+</div>
+}
+
+@if (viewMode === 'EPISODES') {
+<div class="episodes-container ion-padding">
+    <ion-item lines="none" class="header-item">
+        <ion-button slot="start" fill="clear" (click)="goBack()">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+        </ion-button>
+        <ion-label>
+            <h2 class="text-white">EPISODES: {{ selectedAnime?.title }}</h2>
+        </ion-label>
+    </ion-item>
+
+    @if (animeService.state().status === 'LOADING_EPISODES') {
+    <div class="ion-text-center ion-padding">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading episodes...</p>
+    </div>
+    } @else {
+    <ion-grid>
+        <ion-row>
+            @for (ep of animeService.episodes(); track ep.url) {
+            <ion-col size="3" size-md="2">
+                <ion-button expand="block" fill="outline" (click)="playEpisode(ep)">
+                    {{ ep.number }}
+                </ion-button>
+            </ion-col>
+            }
+        </ion-row>
+    </ion-grid>
+    }
+</div>
+}
+
+@if (viewMode === 'PLAYER') {
+<app-video-player [stream]="animeService.state().currentStream" [animeTitle]="selectedAnime?.title"
+    [episodeNumber]="selectedEpisode?.number" (back)="goBack()">
+</app-video-player>
 }

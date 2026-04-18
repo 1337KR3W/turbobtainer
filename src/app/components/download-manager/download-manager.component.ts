@@ -6,15 +6,16 @@ import { UtilsService } from '../../services/utils.service';
 import { SupportGrid } from '../support-grid/support-grid';
 import { TauriService } from '../../services/tauri.service';
 import { AnimeService } from '../../services/anime.service';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { VideoPlayerComponent } from "../video-player/video-player.component";
+import { MetadataCardComponent } from "../metadata-card/metadata-card.component";
 
 @Component({
   selector: 'app-download-manager',
   standalone: true,
   imports: [CommonModule, FormsModule, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonItem, IonInput, IonButton, IonIcon, IonRow, IonCol,
-    IonSpinner, IonProgressBar, IonCardSubtitle, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter, VideoPlayerComponent],
+    IonSpinner, IonProgressBar, IonCardSubtitle, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter, VideoPlayerComponent, MetadataCardComponent],
   templateUrl: './download-manager.component.html',
   styleUrls: ['./download-manager.component.scss']
 })
@@ -45,55 +46,6 @@ export class DownloadManagerComponent {
   }
 
 
-
-  async pruebaAnime() {
-    console.log('--- PASO 1: Buscando Anime ---');
-    await this.animeService.searchAnime('Solo Leveling');
-
-    const resultados = this.animeService.results();
-    console.log('Resultados encontrados:', resultados);
-
-    if (resultados.length > 0) {
-      // Usamos el índice [1] como acordamos para evitar la versión coreana/live action si aplica
-      const primeraSerie = resultados[1] || resultados[0];
-      console.log(`--- PASO 2: Obteniendo capítulos de: ${primeraSerie.title} ---`);
-
-      await this.animeService.getEpisodes(primeraSerie.url);
-      const episodios = this.animeService.episodes();
-      console.log('LISTA DE EPISODIOS EXTRAÍDA:', episodios);
-
-      if (episodios.length > 0) {
-        console.log('✅ TEST EXITOSO (Capítulos)');
-
-        const primerEpisodio = episodios[0];
-        console.log(`--- PASO 3: Extrayendo video de: Cap ${primerEpisodio.number} ---`);
-
-        // Ejecutamos la lógica de Rust
-        await this.animeService.getStream(primerEpisodio.url);
-
-        // Obtenemos el resultado del estado
-        const stream = this.animeService.state().currentStream;
-
-        if (stream && stream.url) {
-          if (stream.server === 'Streamwish_Direct') {
-            console.log('🔥 ¡SÚPER ÉXITO! Link directo obtenido:', stream.url);
-            console.log('Este link debería cargar directamente en Video.js');
-          } else {
-            console.log('✅ TEST EXITOSO (Modo Iframe):', stream);
-            console.log('Cargando el reproductor embebido original...');
-          }
-        } else {
-          console.error('❌ TEST FALLIDO: El servicio devolvió un objeto vacío o nulo.');
-        }
-
-      } else {
-        console.log('❌ TEST FALLIDO: No hay episodios disponibles.');
-      }
-    } else {
-      console.log('⚠️ No se encontraron series en la búsqueda.');
-    }
-  }
-
   isVideoUrl(): boolean {
     return this.utils.isVideoUrl(this.url);
   }
@@ -120,54 +72,49 @@ export class DownloadManagerComponent {
     }
   }
 
-  // Método para seleccionar un Anime y ver sus capítulos
+
+
+  async onInputChange(value: string) {
+    this.url = value;
+    this.urlChange.emit(value);
+
+    if (!value || value.trim().length === 0) {
+      this.animeService.reset();
+      this.viewMode = 'SEARCH';
+      return;
+    }
+
+    if (value.length > 2 && !value.startsWith('http')) {
+      await this.animeService.searchAnime(value);
+    }
+
+    else if (value.startsWith('http')) {
+      this.animeService.reset();
+    }
+  }
+
+  goBack() {
+    if (this.viewMode === 'PLAYER') {
+      this.viewMode = 'EPISODES';
+      // Opcional: limpiar el stream para que no se siga cargando en segundo plano
+      this.animeService.resetStream();
+    }
+    else if (this.viewMode === 'EPISODES') {
+      this.viewMode = 'SEARCH';
+    }
+  }
+
   async selectAnime(anime: any) {
     this.selectedAnime = anime;
     this.viewMode = 'EPISODES';
     await this.animeService.getEpisodes(anime.url);
   }
 
-  // Método para reproducir un episodio
+  // Seleccionar un episodio para reproducir
   async playEpisode(episode: any) {
-    this.selectedEpisode = episode; // Guardamos el episodio seleccionado
+    this.selectedEpisode = episode;
     this.viewMode = 'PLAYER';
     await this.animeService.getStream(episode.url);
   }
-
-  // Volver atrás
-  goBack() {
-    if (this.viewMode === 'PLAYER') {
-      // Si estamos en el video, volvemos a la lista de episodios
-      this.viewMode = 'EPISODES';
-      // Limpiamos el stream actual para que el iframe deje de existir
-      this.animeService.resetStream(); // Opcional, pero recomendado
-    }
-    else if (this.viewMode === 'EPISODES') {
-      // Si estamos en episodios, volvemos a los resultados de búsqueda
-      this.viewMode = 'SEARCH';
-    }
-  }
-
-  async onInputChange(value: string) {
-    this.url = value;
-    this.urlChange.emit(value);
-
-    // 1. Si el usuario borra el texto, reseteamos todo el estado de anime
-    if (!value || value.trim().length === 0) {
-      this.animeService.reset();
-      this.viewMode = 'SEARCH'; // Volvemos al modo búsqueda inicial
-      return;
-    }
-
-    // 2. Solo buscamos si hay más de 2 caracteres y no es una URL
-    if (value.length > 2 && !value.startsWith('http')) {
-      await this.animeService.searchAnime(value);
-    }
-    // 3. Si es una URL, quizás quieras limpiar los resultados de anime para no confundir
-    else if (value.startsWith('http')) {
-      this.animeService.reset();
-    }
-  }
-
 
 }

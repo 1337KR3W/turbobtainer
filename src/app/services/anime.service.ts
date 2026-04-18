@@ -76,4 +76,6 @@ export class AnimeService {
     resetStream() {
         this._state.update(s => ({ ...s, currentStream: null, status: 'IDLE' }));
     }
+
+
 }
