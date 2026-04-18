@@ -6,7 +6,7 @@
 }
 
 ion-card {
-    --background: var(--turbo-black);
+    --background: var(--ion-color-primary);
     background-color: var(--turbo-black);
 
     --color: var(--turbo-white);
@@ -21,9 +21,12 @@ ion-card {
 
 ion-card-content {
     background-color: var(--turbo-black);
-
+    --background: var(--ion-color-primary)
 }
 
+ion-item {
+    --background: var(--ion-color-primary);
+}
 
 
 .video-card {

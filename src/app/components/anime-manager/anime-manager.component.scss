@@ -7,8 +7,9 @@
 
 .anime-item-card {
     margin: 8px 0;
-    background: #1e1e1e;
+    background: var(--turbo-black);
     transition: transform 0.2s;
+    border: 1px solid var(--turbo-red-vibrant);
 
     &:hover {
         transform: scale(1.05);
@@ -33,4 +34,9 @@ ion-button[fill="outline"] {
     &:hover {
         box-shadow: 0 0 15px var(--turbo-red-glow);
     }
+}
+
+.spacing {
+    padding-bottom: 80px;
+
 }
