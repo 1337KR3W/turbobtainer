@@ -363,7 +363,10 @@ pub fn run() {
             download_video,
             check_gallery_binary,
             check_gallery_url,
-            download_gallery
+            download_gallery,
+            anime::search_anime,
+            anime::get_anime_episodes,
+            anime::get_stream_link
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
