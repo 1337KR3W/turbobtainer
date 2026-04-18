@@ -85,6 +85,10 @@ export class UtilsService {
             return this.getIconUrl('youtube');
         }
 
+        if (urlLower.includes('animeflv')) {
+            return this.getIconUrl('animeflv');
+        }
+
         try {
             const domain = new URL(url).hostname.replace('www.', '');
             return this.getIconUrl(domain);

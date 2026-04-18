@@ -26,7 +26,6 @@ pub struct StreamSource {
 
 #[tauri::command]
 pub async fn search_anime(query: String) -> Result<Vec<Anime>, String> {
-    println!(">>> RUST RECIBIÓ BÚSQUEDA: {}", query); // Mira la consola de la terminal
     let url = format!("https://www3.animeflv.net/browse?q={}", query.replace(" ", "+"));
     let client = reqwest::Client::new();
 

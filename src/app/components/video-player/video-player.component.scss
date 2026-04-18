@@ -6,61 +6,33 @@
 }
 
 ion-card {
-    --background: var(--ion-color-primary);
-    background-color: var(--turbo-black);
-
+    // Definimos el estilo base una sola vez
+    --background: var(--turbo-black);
     --color: var(--turbo-white);
+    background: var(--turbo-black); // Refuerzo para navegadores que ignoren la variable de Ionic
+
     border-radius: 12px;
     border: 1px solid var(--turbo-red-dark);
+    margin: 10px;
+    overflow: hidden;
 
-    .video-header {
-        background-color: var(--turbo-black);
-
+    // Todos los hijos directos heredarán el fondo transparente
+    ion-card-content,
+    ion-item,
+    .video-header,
+    .video-footer {
+        --background: transparent;
+        background-color: transparent;
+        --color: var(--turbo-white);
     }
 }
 
-ion-card-content {
-    background-color: var(--turbo-black);
-    --background: var(--ion-color-primary)
-}
-
-ion-item {
-    --background: var(--ion-color-primary);
-}
-
-
-.video-card {
-    overflow: hidden;
-    background-color: var(--turbo-black);
-}
-
-.video-header {
-    background-color: var(--turbo-black);
-
-}
 
 .iframe-wrapper {
     position: relative;
-    padding-bottom: 56.25%;
-    /* 16:9 */
+    padding-bottom: 56.25%; // Proporción 16:9
     height: 0;
-    background-color: var(--turbo-black);
-    border-radius: 0px;
-
-    &:fullscreen {
-        width: 100vw;
-        height: 100vh;
-        aspect-ratio: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    // Lo mismo para navegadores basados en Webkit (Safari/Chrome viejo)
-    &:-webkit-full-screen {
-        width: 100vw;
-        height: 100vh;
-    }
+    background: #000; // Negro puro para el video
 
     iframe {
         position: absolute;
@@ -69,26 +41,26 @@ ion-item {
         width: 100%;
         height: 100%;
         border: none;
-        border-radius: 0px;
+    }
+
+    &:fullscreen {
+        padding-bottom: 0;
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        background: #000;
     }
 }
 
-// Botón flotante para activar el modo
 .fullscreen-fix-btn {
     position: absolute;
     bottom: 10px;
     right: 10px;
     z-index: 10;
-    --color: white;
+    --color: var(--turbo-white);
+    background: rgba(0, 0, 0, 0.5); // Un poco de transparencia oscura
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    opacity: 0.6;
-    transition: opacity 0.3s;
-
-    &:hover {
-        opacity: 1;
-    }
 }
 
 .loading-placeholder {
@@ -97,14 +69,10 @@ ion-item {
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    color: white;
+    color: var(--turbo-white);
 }
 
 .text-red {
     color: var(--turbo-red-vibrant);
     font-weight: bold;
-}
-
-.video-footer {
-    background-color: var(--turbo-black);
 }

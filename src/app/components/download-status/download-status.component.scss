@@ -4,6 +4,17 @@
     border-radius: 12px;
 }
 
+ion-progress-bar {
+    height: 12px;
+    border-radius: 8px;
+
+    /* COLOR DE LA CARGA (El que quieres rojo) */
+    --progress-background: var(--turbo-red-vibrant);
+
+    /* COLOR DEL FONDO (El que quieres azul) */
+    --buffer-background: var(--turbo-black);
+}
+
 /* Progreso */
 .progress-text {
     font-weight: bold;

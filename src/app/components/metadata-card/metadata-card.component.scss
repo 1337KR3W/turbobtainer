@@ -65,14 +65,3 @@ ion-card {
     font-weight: bold;
     margin-top: 10px;
 }
-
-ion-button {
-    &::part(native) {
-        transition: all 0.3s ease;
-    }
-
-    &:hover {
-        filter: brightness(1.2);
-        box-shadow: 0 0 15px var(--turbo-red-glow);
-    }
-}

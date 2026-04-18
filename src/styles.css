@@ -12,9 +12,7 @@
 @import "@ionic/angular/css/flex-utils.css";
 @import "@ionic/angular/css/display.css";
 
-
 /* Core de Ionic */
-
 :root {
     /* --- PALETA DE MARCA TURBOTAINER --- */
     --turbo-black: #000000;
@@ -57,30 +55,31 @@ button {
     font-size: 1em;
     font-weight: 500;
     font-family: inherit;
-    /* Colores modo Dark Hacker */
     color: var(--turbo-white);
     background-color: var(--turbo-black);
-
     transition: all 0.25s ease;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     outline: none;
+}
 
-    &:hover {
-        border-color: var(--turbo-red-vibrant);
-        box-shadow: 0 0 12px var(--turbo-red-glow);
-        transform: translateY(-1px);
-    }
+input:hover,
+button:hover {
+    border-color: var(--turbo-red-vibrant);
+    box-shadow: 0 0 12px var(--turbo-red-glow);
+    transform: translateY(-1px);
+}
 
-    &:active {
-        background-color: var(--turbo-red-dark);
-        transform: translateY(0);
-    }
+input:active,
+button:active {
+    background-color: var(--turbo-red-dark);
+    transform: translateY(0);
+}
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        border-color: var(--turbo-grey-text);
-    }
+input:disabled,
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--turbo-grey-text);
 }
 
 .btn-primary {
@@ -99,14 +98,14 @@ a {
     font-weight: 500;
     color: var(--turbo-red-vibrant);
     text-decoration: inherit;
-
-    &:hover {
-        color: var(--turbo-white);
-        text-shadow: 0 0 5px var(--turbo-red-glow);
-    }
 }
 
-/* Scrollbar personalizada para look Dark (opcional pero recomendado) */
+a:hover {
+    color: var(--turbo-white);
+    text-shadow: 0 0 5px var(--turbo-red-glow);
+}
+
+/* Scrollbar personalizada global */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -124,7 +123,7 @@ a {
     background: var(--turbo-red-vibrant);
 }
 
-/* Definimos la capa del fondo ASCII */
+/* Capa del fondo ASCII */
 .ascii-bg-container {
     position: fixed;
     top: 0;
@@ -150,42 +149,40 @@ a {
     user-select: none;
 }
 
-
+/* ion-content y su Scrollbar específica */
 ion-content {
     --background: transparent;
-
-    &::part(scroll) {
-        &::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        &::-webkit-scrollbar-track {
-            background: var(--turbo-black);
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: var(--turbo-red-dark);
-            border-radius: 10px;
-
-            &:hover {
-                background: var(--turbo-red-vibrant);
-            }
-        }
-    }
-
     scrollbar-width: thin;
     scrollbar-color: var(--turbo-red-dark) var(--turbo-black);
 }
 
+ion-content::part(scroll)::-webkit-scrollbar {
+    width: 6px;
+}
+
+ion-content::part(scroll)::-webkit-scrollbar-track {
+    background: var(--turbo-black);
+}
+
+ion-content::part(scroll)::-webkit-scrollbar-thumb {
+    background: var(--turbo-red-dark);
+    border-radius: 10px;
+}
+
+ion-content::part(scroll)::-webkit-scrollbar-thumb:hover {
+    background: var(--turbo-red-vibrant);
+}
+
+
 ion-button {
     font-weight: bold;
     margin-top: 10px;
+}
 
-    &::part(native) {
-        transition: all 0.3s ease;
-    }
+ion-button::part(native) {
+    transition: all 0.3s ease;
+}
 
-    &:hover {
-        box-shadow: 0 0 15px var(--turbo-red-glow);
-    }
+ion-button:hover {
+    box-shadow: 0 0 15px var(--turbo-red-glow);
 }

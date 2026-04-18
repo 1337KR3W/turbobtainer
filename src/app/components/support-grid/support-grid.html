@@ -25,7 +25,18 @@
                     </div>
                     <span class="platform-name">{{ 'youtube'.split('.')[0] }}</span>
                 </div>
+
             </ion-col>
+            <ion-col size="3" size-sm="2" size-md="1.5">
+
+                <div class="platform-item">
+                    <div class="icon-box">
+                        <img [src]="this.utils.getIconUrl('animeflv')" alt="AnimeFlv" loading="lazy">
+                    </div>
+                    <span class="platform-name">{{ 'animeflv'.split('.')[0] }}</span>
+                </div>
+            </ion-col>
+
             @for (sitio of sitiosSoportados; track $index) {
             <ion-col size="3" size-sm="2" size-md="1.5">
                 <div class="platform-item">

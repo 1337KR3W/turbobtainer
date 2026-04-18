@@ -1,10 +1,11 @@
-<div class="ascii-bg-container">
-  <pre class="ascii-art">{{ utilsService.currentAscii() }}</pre>
-</div>
 <ion-app>
   <app-header></app-header>
 
   <ion-content class="ion-padding turbo-main-content">
+
+    <div class="ascii-bg-container">
+      <pre class="ascii-art">{{ utilsService.currentAscii() }}</pre>
+    </div>
 
     <app-download-manager [(url)]="url" (analyze)="checkUrlType($event)" (download)="startDownload()"
       (cancelDld)="cancel()">

@@ -11,7 +11,6 @@ pub struct GalleryMetadata {
     description: String
 }
 
-
 #[tauri::command]
 pub async fn check_gallery_binary(app: tauri::AppHandle) -> Result<String, String> {
     let sidecar = app.shell().sidecar("gallery-dl")
@@ -29,7 +28,6 @@ pub async fn check_gallery_binary(app: tauri::AppHandle) -> Result<String, Strin
         Err(String::from_utf8_lossy(&output.stderr).to_string())
     }
 }
-
 
 #[tauri::command]
 pub async fn check_gallery_url(app: tauri::AppHandle, url: String) -> Result<GalleryMetadata, String> {
