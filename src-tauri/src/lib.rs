@@ -72,7 +72,7 @@ async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Res
     
     // --- 1. PREPARAR EL SIDECAR DE FFmpeg ---
     // En lugar de buscar un archivo en una carpeta, le pedimos a Tauri su sidecar oficial.
-    let ffmpeg_sidecar = app.shell().sidecar("ffmpeg")
+    let _ffmpeg_sidecar = app.shell().sidecar("ffmpeg")
         .map_err(|e| format!("FFmpeg Sidecar Error: {}", e))?;
 
     // --- 2. DIRECTORIO DE DESCARGA ---
