@@ -9,13 +9,16 @@ import { AnimeService } from '../../services/anime.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { VideoPlayerComponent } from "../video-player/video-player.component";
 import { MetadataCardComponent } from "../metadata-card/metadata-card.component";
+import { DownloadStatusComponent } from "../download-status/download-status.component";
+import { SearchManagerComponent } from "../search-manager/search-manager.component";
+import { AnimeManagerComponent } from "../anime-manager/anime-manager.component";
 
 @Component({
   selector: 'app-download-manager',
   standalone: true,
   imports: [CommonModule, FormsModule, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonItem, IonInput, IonButton, IonIcon, IonRow, IonCol,
-    IonSpinner, IonProgressBar, IonCardSubtitle, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter, VideoPlayerComponent, MetadataCardComponent],
+    IonSpinner, IonProgressBar, IonCardSubtitle, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter, VideoPlayerComponent, MetadataCardComponent, DownloadStatusComponent, SearchManagerComponent, AnimeManagerComponent],
   templateUrl: './download-manager.component.html',
   styleUrls: ['./download-manager.component.scss']
 })

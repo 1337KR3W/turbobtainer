@@ -1,0 +1,32 @@
+.anime-thumb {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.anime-item-card {
+    margin: 8px 0;
+    background: #1e1e1e;
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+.header-item {
+    --background: transparent;
+    --padding-start: 0;
+    margin-bottom: 10px;
+}
+
+.text-white {
+    color: white;
+}
+
+// Puedes añadir estilos específicos para la cuadrícula de episodios si quieres que se vea más "Turbo"
+ion-button[fill="outline"] {
+    --border-color: var(--turbo-red-dark);
+    --color: var(--turbo-white);
+}

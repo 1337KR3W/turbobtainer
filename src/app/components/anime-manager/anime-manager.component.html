@@ -1,0 +1,57 @@
+@if (viewMode === 'SEARCH' && results.length > 0) {
+<div class="anime-results-container ion-padding-top">
+    <h3 class="ion-padding-horizontal text-white">Search results</h3>
+    <ion-grid>
+        <ion-row>
+            @for (anime of results; track anime.url) {
+            <ion-col size="6" size-md="4" size-lg="3">
+                <ion-card button (click)="selectAnime.emit(anime)" class="anime-item-card">
+                    <img [src]="anime.thumbnail" class="anime-thumb" alt="thumbnail" />
+                    <ion-card-header class="ion-no-padding ion-padding-vertical">
+                        <ion-card-subtitle class="ion-text-center">{{ anime.title }}</ion-card-subtitle>
+                    </ion-card-header>
+                </ion-card>
+            </ion-col>
+            }
+        </ion-row>
+    </ion-grid>
+</div>
+}
+
+@if (viewMode === 'EPISODES') {
+<div class="episodes-container ion-padding">
+    <ion-item lines="none" class="header-item">
+        <ion-button slot="start" fill="clear" (click)="goBack.emit()">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+        </ion-button>
+        <ion-label>
+            <h2 class="text-white">EPISODES: {{ selectedAnime?.title }}</h2>
+        </ion-label>
+    </ion-item>
+
+    @if (status === 'LOADING_EPISODES') {
+    <div class="ion-text-center ion-padding">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p class="text-white">Loading episodes...</p>
+    </div>
+    } @else {
+    <ion-grid>
+        <ion-row>
+            @for (ep of episodes; track ep.url) {
+            <ion-col size="3" size-md="2">
+                <ion-button expand="block" fill="outline" (click)="playEpisode.emit(ep)">
+                    {{ ep.number }}
+                </ion-button>
+            </ion-col>
+            }
+        </ion-row>
+    </ion-grid>
+    }
+</div>
+}
+
+@if (viewMode === 'PLAYER') {
+<app-video-player [stream]="currentStream" [animeTitle]="selectedAnime?.title" [episodeNumber]="selectedEpisode?.number"
+    (back)="goBack.emit()">
+</app-video-player>
+}
