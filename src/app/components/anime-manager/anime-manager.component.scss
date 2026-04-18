@@ -1,0 +1,44 @@
+.anime-thumb {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.anime-item-card {
+    margin: 8px 0;
+    background: var(--turbo-black);
+    transition: transform 0.2s;
+    border: 1px solid var(--turbo-red-vibrant);
+
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+.header-item {
+    --background: transparent;
+    --padding-start: 0;
+    margin-bottom: 10px;
+}
+
+.text-red {
+    color: var(--turbo-red-vibrant);
+
+}
+
+
+ion-button[fill="outline"] {
+    --background: var(--turbo-red-vibrant);
+    --color: var(--turbo-black);
+
+    &:hover {
+        box-shadow: 0 0 15px var(--turbo-red-glow);
+    }
+}
+
+
+.spacing {
+    padding-bottom: 80px;
+
+}

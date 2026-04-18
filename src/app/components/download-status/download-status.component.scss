@@ -1,0 +1,80 @@
+.turbo-card-container {
+    --background: var(--turbo-black);
+    border: 1px solid var(--turbo-red-dark);
+    border-radius: 12px;
+}
+
+ion-progress-bar {
+    height: 12px;
+    border-radius: 8px;
+
+    /* COLOR DE LA CARGA (El que quieres rojo) */
+    --progress-background: var(--turbo-red-vibrant);
+
+    /* COLOR DEL FONDO (El que quieres azul) */
+    --buffer-background: var(--turbo-black);
+}
+
+/* Progreso */
+.progress-text {
+    font-weight: bold;
+    margin: 0;
+    color: var(--turbo-red-vibrant);
+    font-size: 2.5rem;
+}
+
+.btn-stop {
+    --color: var(--turbo-red-vibrant);
+    --border-color: var(--turbo-red-dark);
+    margin-top: 15px;
+}
+
+/* Éxito */
+.success-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 2rem 1.5rem;
+
+    .success-icon {
+        color: var(--turbo-red-vibrant);
+        font-size: 80px;
+        filter: drop-shadow(0 0 15px var(--turbo-red-glow));
+        margin-bottom: 1rem;
+    }
+
+    .success-text h2 {
+        font-weight: bold;
+        color: var(--turbo-white);
+        font-size: 1.4rem;
+    }
+}
+
+/* Error */
+.error-card {
+    --background: var(--turbo-black);
+    border: 1px solid var(--turbo-red-dark);
+    border-radius: 12px;
+}
+
+.error-icon {
+    color: var(--turbo-red-vibrant);
+}
+
+.error-title {
+    color: var(--turbo-red-vibrant);
+}
+
+.error-msg {
+    color: var(--turbo-white);
+}
+
+.btn-retry {
+    --color: var(--turbo-white);
+}
+
+.btn-primary {
+    --background: var(--turbo-red-vibrant);
+    --color: var(--turbo-black);
+}

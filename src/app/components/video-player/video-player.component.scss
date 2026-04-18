@@ -1,0 +1,78 @@
+:host {
+    display: block;
+    width: 100%;
+    height: 100%; // Asegura que el host ocupe el espacio disponible
+
+}
+
+ion-card {
+    // Definimos el estilo base una sola vez
+    --background: var(--turbo-black);
+    --color: var(--turbo-white);
+    background: var(--turbo-black); // Refuerzo para navegadores que ignoren la variable de Ionic
+
+    border-radius: 12px;
+    border: 1px solid var(--turbo-red-dark);
+    margin: 10px;
+    overflow: hidden;
+
+    // Todos los hijos directos heredarán el fondo transparente
+    ion-card-content,
+    ion-item,
+    .video-header,
+    .video-footer {
+        --background: transparent;
+        background-color: transparent;
+        --color: var(--turbo-white);
+    }
+}
+
+
+.iframe-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; // Proporción 16:9
+    height: 0;
+    background: #000; // Negro puro para el video
+
+    iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    &:fullscreen {
+        padding-bottom: 0;
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        background: #000;
+    }
+}
+
+.fullscreen-fix-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10;
+    --color: var(--turbo-white);
+    background: rgba(0, 0, 0, 0.5); // Un poco de transparencia oscura
+    border-radius: 50%;
+}
+
+.loading-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--turbo-white);
+}
+
+.text-red {
+    color: var(--turbo-red-vibrant);
+    font-weight: bold;
+}

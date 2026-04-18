@@ -1,17 +1,19 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonIcon, IonInput, IonItem, IonProgressBar, IonRow, IonSpinner, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter } from '@ionic/angular/standalone';
 import { UtilsService } from '../../services/utils.service';
 import { SupportGrid } from '../support-grid/support-grid';
 import { TauriService } from '../../services/tauri.service';
+import { AnimeService } from '../../services/anime.service';
+import { MetadataCardComponent } from "../metadata-card/metadata-card.component";
+import { DownloadStatusComponent } from "../download-status/download-status.component";
+import { SearchManagerComponent } from "../search-manager/search-manager.component";
+import { AnimeManagerComponent } from "../anime-manager/anime-manager.component";
 
 @Component({
   selector: 'app-download-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonItem, IonInput, IonButton, IonIcon, IonRow, IonCol,
-    IonSpinner, IonProgressBar, IonCardSubtitle, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter],
+  imports: [CommonModule, FormsModule, MetadataCardComponent, DownloadStatusComponent, SearchManagerComponent, AnimeManagerComponent],
   templateUrl: './download-manager.component.html',
   styleUrls: ['./download-manager.component.scss']
 })
@@ -19,14 +21,17 @@ export class DownloadManagerComponent {
 
   private readonly utils = inject(UtilsService);
   public readonly tauri = inject(TauriService);
-
+  public animeService = inject(AnimeService);
   public readonly supportedPlatforms = this.utils.MASTER_SITES;
+  public viewMode: 'SEARCH' | 'EPISODES' | 'PLAYER' = 'SEARCH';
+  public selectedAnime: any = null;
 
   @Input() url: string = '';
   @Output() urlChange = new EventEmitter<string>();
   @Output() analyze = new EventEmitter<'audio' | 'video' | 'gallery'>();
   @Output() download = new EventEmitter<void>();
   @Output() cancelDld = new EventEmitter<void>();
+  public selectedEpisode: any = null;
 
   constructor() {
 
@@ -53,6 +58,54 @@ export class DownloadManagerComponent {
   }
   setRandomBackGround() {
     this.utils.setRandomAscii();
+  }
+
+  async handleSearch(event: any) {
+    const query = event.target.value;
+    if (query && query.length > 2 && !query.startsWith('http')) {
+      await this.animeService.searchAnime(query);
+    }
+  }
+
+  async onInputChange(value: string) {
+    this.url = value;
+    this.urlChange.emit(value);
+
+    if (!value || value.trim().length === 0) {
+      this.animeService.reset();
+      this.viewMode = 'SEARCH';
+      return;
+    }
+
+    if (value.length > 2 && !value.startsWith('http')) {
+      await this.animeService.searchAnime(value);
+    }
+
+    else if (value.startsWith('http')) {
+      this.animeService.reset();
+    }
+  }
+
+  goBack() {
+    if (this.viewMode === 'PLAYER') {
+      this.viewMode = 'EPISODES';
+      this.animeService.resetStream();
+    }
+    else if (this.viewMode === 'EPISODES') {
+      this.viewMode = 'SEARCH';
+    }
+  }
+
+  async selectAnime(anime: any) {
+    this.selectedAnime = anime;
+    this.viewMode = 'EPISODES';
+    await this.animeService.getEpisodes(anime.url);
+  }
+
+  async playEpisode(episode: any) {
+    this.selectedEpisode = episode;
+    this.viewMode = 'PLAYER';
+    await this.animeService.getStream(episode.url);
   }
 
 }

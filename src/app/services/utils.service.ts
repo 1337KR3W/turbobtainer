@@ -13,7 +13,10 @@ import {
     cloudDownloadOutline,
     logoYoutube,
     imageOutline,
-    checkmarkCircle
+    checkmarkCircle,
+    tvOutline,
+    arrowBackOutline,
+    openOutline
 } from 'ionicons/icons';
 import { TauriService } from './tauri.service';
 import { ModalController } from '@ionic/angular/standalone';
@@ -31,7 +34,7 @@ export class UtilsService {
     public readonly MASTER_SITES = SUPPORTED_PLATFORMS;
     public currentAscii = signal<string>(ASCII_DESIGNS[0]);
     constructor() {
-        this.setRandomAscii(); // Inicialización
+        this.setRandomAscii();
     }
     public initializeIcons() {
         addIcons({
@@ -47,7 +50,10 @@ export class UtilsService {
             'cloudDownloadOutline': cloudDownloadOutline,
             'logoYoutube': logoYoutube,
             'image-outline': imageOutline,
-            'checkmark-circle': checkmarkCircle
+            'checkmark-circle': checkmarkCircle,
+            'tv-outline': tvOutline,
+            'arrow-back-outline': arrowBackOutline,
+            'open-outline': openOutline
         });
     }
 
@@ -65,7 +71,6 @@ export class UtilsService {
     public isGalleryUrl(url: string): boolean {
         if (!url) return false;
         const urlLower = url.toLowerCase();
-        // Comprobamos contra la lista de plataformas del modelo de datos
         return this.MASTER_SITES.some(sitio => urlLower.includes(sitio));
     }
     public getPlatformLogo(url: string): string {
@@ -78,6 +83,10 @@ export class UtilsService {
 
         if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
             return this.getIconUrl('youtube');
+        }
+
+        if (urlLower.includes('animeflv')) {
+            return this.getIconUrl('animeflv');
         }
 
         try {

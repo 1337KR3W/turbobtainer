@@ -1,0 +1,69 @@
+<ion-card>
+    <ion-card-header>
+        <ion-card-title>It doesn't just obtain content; it Turbobtains it</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+        <ion-item lines="none" class="turbo-input-item">
+            <img src="assets/input-logo.png" slot="start" class="input-turbo-logo" alt="Logo">
+            <ion-input [ngModel]="url" (ngModelChange)="urlChange.emit($event)"
+                placeholder="Example: https://www.youtube.com/..." class="custom-input">
+            </ion-input>
+        </ion-item>
+
+        <ion-row class="ion-margin-top">
+            <ion-col size="3">
+                <ion-button expand="block" class="btn-primary" (click)="analyze.emit('audio')"
+                    [disabled]="status === 'ANALYZING' || !url || !isVideo">
+                    @if (status === 'ANALYZING' && tipoSeleccionado === 'audio') {
+                    <ion-spinner name="dots" class="spinner-audio"></ion-spinner>
+                    } @else {
+                    <ion-icon name="musical-notes-outline" slot="start"></ion-icon> Audio
+                    }
+                </ion-button>
+            </ion-col>
+
+            <ion-col size="3">
+                <ion-button expand="block" class="btn-primary" (click)="analyze.emit('video')"
+                    [disabled]="status === 'ANALYZING' || !url || !isVideo">
+                    @if (status === 'ANALYZING' && tipoSeleccionado === 'video') {
+                    <ion-spinner name="dots" class="spinner-video"></ion-spinner>
+                    } @else {
+                    <ion-icon name="videocam-outline" slot="start"></ion-icon> Video
+                    }
+                </ion-button>
+            </ion-col>
+
+            <ion-col size="3">
+                <ion-button expand="block" class="btn-primary" (click)="analyze.emit('gallery')"
+                    [disabled]="status === 'ANALYZING' || !url || !isGallery">
+                    @if (status === 'ANALYZING' && tipoSeleccionado === 'gallery') {
+                    <ion-spinner name="dots" class="spinner-video"></ion-spinner>
+                    } @else {
+                    <ion-icon name="image-outline" slot="start"></ion-icon> Gallery
+                    }
+                </ion-button>
+            </ion-col>
+
+            <ion-col size="3">
+                <ion-button expand="block" class="btn-primary" (click)="openAnime.emit()" [disabled]="animeCount === 0">
+                    <ion-icon name="tv-outline" slot="start"></ion-icon>
+                    Anime ({{ animeCount }})
+                </ion-button>
+            </ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col size="5">
+                <ion-button fill="clear" (click)="openSupport.emit()" class="btn-secondary">
+                    <ion-icon name="globe-outline" slot="start"></ion-icon> Supported platforms
+                </ion-button>
+            </ion-col>
+            <ion-col size="4">
+                <ion-button fill="clear" (click)="randomBg.emit()" class="btn-secondary">
+                    RANDOM
+                </ion-button>
+            </ion-col>
+        </ion-row>
+
+    </ion-card-content>
+</ion-card>

@@ -1,0 +1,67 @@
+/* Estilo base de la tarjeta en MetadataCard */
+ion-card {
+    --background: var(--turbo-black);
+    --color: var(--turbo-white);
+    border-radius: 12px;
+    border: 1px solid var(--turbo-red-dark);
+    margin: 0;
+
+    ion-item {
+        --background: transparent;
+        --color: var(--turbo-white);
+        --border-color: transparent;
+    }
+}
+
+// Metadata List
+.metadata-list {
+    background-color: var(--turbo-black);
+
+    ion-item {
+        --background: var(--turbo-black);
+        min-height: 30px;
+        font-size: 0.9rem;
+        color: var(--turbo-grey-text);
+        border-bottom: 1px solid var(--turbo-red-glow);
+
+        strong {
+            color: var(--turbo-white);
+            margin-left: 5px;
+        }
+    }
+}
+
+// Thumbnail & Platform Logo
+.thumbnail-preview {
+    width: 100%;
+    height: 120px;
+    max-width: 180px;
+    border-radius: 1px;
+    border: 1px solid var(--turbo-red-dark);
+    margin: 0 auto;
+}
+
+.platform-logo-container {
+    text-align: center;
+
+    .gallery-platform-icon {
+        width: 60px;
+        height: 60px;
+        filter: drop-shadow(0 0 10px var(--turbo-red-glow));
+    }
+
+    .source-text {
+        color: var(--turbo-grey-text);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        margin-top: 5px;
+    }
+}
+
+/* Botones dentro de la tarjeta */
+.btn-primary {
+    --background: var(--turbo-red-vibrant);
+    --color: var(--turbo-black);
+    font-weight: bold;
+    margin-top: 10px;
+}
