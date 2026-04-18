@@ -21,12 +21,16 @@
     margin-bottom: 10px;
 }
 
-.text-white {
-    color: white;
+.text-red {
+    color: var(--turbo-red-vibrant);
+
 }
 
-// Puedes añadir estilos específicos para la cuadrícula de episodios si quieres que se vea más "Turbo"
 ion-button[fill="outline"] {
-    --border-color: var(--turbo-red-dark);
-    --color: var(--turbo-white);
+    --background: var(--turbo-red-vibrant);
+    --color: var(--turbo-black);
+
+    &:hover {
+        box-shadow: 0 0 15px var(--turbo-red-glow);
+    }
 }

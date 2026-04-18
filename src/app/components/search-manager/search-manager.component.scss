@@ -3,6 +3,7 @@ ion-card {
     --color: var(--turbo-white);
     border-radius: 12px;
     border: 1px solid var(--turbo-red-dark);
+    margin-bottom: 30px;
 
     ion-card-title {
         color: var(--turbo-red-dark) !important;
@@ -38,15 +39,4 @@ ion-card {
 
 .spinner-video {
     --color: var(--turbo-black) !important;
-}
-
-.btn-primary {
-    --background: var(--turbo-red-vibrant);
-    --color: var(--turbo-black);
-}
-
-.btn-secondary {
-    --background: var(--turbo-dark-grey);
-    --color: var(--turbo-red-vibrant);
-    --border: 1px solid var(--turbo-red-vibrant);
 }

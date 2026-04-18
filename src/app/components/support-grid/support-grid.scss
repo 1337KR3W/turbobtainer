@@ -77,30 +77,3 @@ ion-title {
     color: var(--ion-color-step-400);
     margin-top: 10px;
 }
-
-ion-content {
-
-    // 1. Usamos ::part(scroll) para inyectar el estilo a través del Shadow DOM
-    &::part(scroll) {
-        &::-webkit-scrollbar {
-            width: 6px; // Un poco más fino para que sea elegante
-        }
-
-        &::-webkit-scrollbar-track {
-            background: var(--turbo-black);
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: var(--turbo-red-dark);
-            border-radius: 10px;
-
-            &:hover {
-                background: var(--turbo-red-vibrant);
-            }
-        }
-    }
-
-    // 2. Compatibilidad para Firefox
-    scrollbar-width: thin;
-    scrollbar-color: var(--turbo-red-dark) var(--turbo-black);
-}

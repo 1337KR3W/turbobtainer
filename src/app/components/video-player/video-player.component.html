@@ -1,43 +1,40 @@
 @if (stream) {
-<ion-card class="video-card ion-no-margin">
+<ion-card class="video-card">
     <ion-item lines="none" class="video-header">
         <ion-button slot="start" fill="clear" color="medium" (click)="back.emit()">
-            <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
-            <ion-label class="ion-padding-start">Back</ion-label>
+            <ion-icon name="arrow-back-outline" slot="icon-only" class="text-red"></ion-icon>
         </ion-button>
 
         <ion-label>
-            <h2 class="text-white">{{ animeTitle }} - Chapter {{ episodeNumber }}</h2>
+            <h2 class="text-red">{{ animeTitle }} - Chapter {{ episodeNumber }}</h2>
 
         </ion-label>
 
         <ion-badge slot="end" color="primary">{{ stream.server }}</ion-badge>
     </ion-item>
 
-    <ion-card-content class="ion-no-padding">
-        <div class="iframe-wrapper">
-            @if (getSafeUrl(); as safeUrl) {
-            <iframe [src]="safeUrl" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen>
-            </iframe>
-            } @else {
-            <ion-grid class="ion-text-center ion-padding">
-                <ion-row>
-                    <ion-col>
-                        <ion-spinner name="crescent"></ion-spinner>
-                        <p class="text-white">Loading stream...</p>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-            }
-        </div>
-    </ion-card-content>
+    <ion-card class="video-card ion-no-margin">
+        <ion-card-content class="ion-no-padding">
+            <div class="iframe-wrapper" #videoContainer>
+                @if (getSafeUrl(); as safeUrl) {
+                <iframe [src]="safeUrl" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen>
+                </iframe>
+
+                <ion-button class="fullscreen-fix-btn" fill="clear" (click)="toggleFullscreen(videoContainer)">
+                    <ion-icon name="expand-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+                }
+            </div>
+        </ion-card-content>
+
+    </ion-card>
 
     <ion-item lines="none" class="video-footer">
         <ion-icon name="information-circle-outline" slot="start" color="medium"></ion-icon>
         <ion-label class="ion-text-wrap">
-            <p>If the video doesn't load, try to open in browser.</p>
+            <p class="text-red">If the video doesn't load, try to open in browser.</p>
         </ion-label>
-        <ion-button slot="end" fill="outline" size="small" [href]="stream.url" target="_blank">
+        <ion-button slot="end" fill="outline" size="small" [href]="stream.url" target="_blank" class="btn-primary">
             <ion-icon name="open-outline" slot="start"></ion-icon>
             <ion-label>External</ion-label>
         </ion-button>

@@ -83,6 +83,17 @@ button {
     }
 }
 
+.btn-primary {
+    --background: var(--turbo-red-vibrant);
+    --color: var(--turbo-black);
+}
+
+.btn-secondary {
+    --background: var(--turbo-dark-grey);
+    --color: var(--turbo-red-vibrant);
+    --border: 1px solid var(--turbo-red-vibrant);
+}
+
 /* Enlaces personalizados */
 a {
     font-weight: 500;
@@ -139,7 +150,42 @@ a {
     user-select: none;
 }
 
-/* IMPORTANTE: Hacer que ion-content sea transparente */
+
 ion-content {
     --background: transparent;
+
+    &::part(scroll) {
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: var(--turbo-black);
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--turbo-red-dark);
+            border-radius: 10px;
+
+            &:hover {
+                background: var(--turbo-red-vibrant);
+            }
+        }
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--turbo-red-dark) var(--turbo-black);
+}
+
+ion-button {
+    font-weight: bold;
+    margin-top: 10px;
+
+    &::part(native) {
+        transition: all 0.3s ease;
+    }
+
+    &:hover {
+        box-shadow: 0 0 15px var(--turbo-red-glow);
+    }
 }

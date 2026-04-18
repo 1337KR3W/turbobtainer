@@ -13,7 +13,7 @@
 
         <ion-row class="ion-margin-top">
             <ion-col size="3">
-                <ion-button expand="block" class="btn-secondary" (click)="analyze.emit('audio')"
+                <ion-button expand="block" class="btn-primary" (click)="analyze.emit('audio')"
                     [disabled]="status === 'ANALYZING' || !url || !isVideo">
                     @if (status === 'ANALYZING' && tipoSeleccionado === 'audio') {
                     <ion-spinner name="dots" class="spinner-audio"></ion-spinner>
@@ -52,12 +52,18 @@
                 </ion-button>
             </ion-col>
         </ion-row>
+        <ion-row>
+            <ion-col size="5">
+                <ion-button fill="clear" (click)="openSupport.emit()" class="btn-secondary">
+                    <ion-icon name="globe-outline" slot="start"></ion-icon> Supported platforms
+                </ion-button>
+            </ion-col>
+            <ion-col size="4">
+                <ion-button fill="clear" (click)="randomBg.emit()" class="btn-secondary">
+                    RANDOM
+                </ion-button>
+            </ion-col>
+        </ion-row>
 
-        <ion-button fill="clear" (click)="openSupport.emit()">
-            <ion-icon name="globe-outline" slot="start"></ion-icon> Supported platforms
-        </ion-button>
-        <ion-button fill="clear" (click)="randomBg.emit()">
-            RANDOM
-        </ion-button>
     </ion-card-content>
 </ion-card>

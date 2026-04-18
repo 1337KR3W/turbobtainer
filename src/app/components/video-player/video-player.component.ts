@@ -1,14 +1,14 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { IonButton, IonIcon, IonCard, IonItem, IonLabel, IonBadge, IonCardContent, IonSpinner, IonList, IonThumbnail, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
+import { IonButton, IonIcon, IonCard, IonItem, IonLabel, IonBadge, IonCardContent } from '@ionic/angular/standalone';
 import { StreamSource } from '../../models/anime.model';
 import { AnimeService } from '../../services/anime.service';
 
 @Component({
   selector: 'app-video-player',
   standalone: true,
-  imports: [CommonModule, IonButton, IonIcon, IonCard, IonItem, IonLabel, IonBadge, IonCardContent, IonSpinner, IonList, IonThumbnail, IonGrid, IonRow, IonCol],
+  imports: [CommonModule, IonButton, IonIcon, IonCard, IonItem, IonLabel, IonBadge, IonCardContent],
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.scss']
 })
@@ -71,6 +71,24 @@ export class VideoPlayerComponent {
     else if (this.viewMode === 'EPISODES') {
       // Si estamos en episodios, volvemos a los resultados de búsqueda
       this.viewMode = 'SEARCH';
+    }
+  }
+
+  toggleFullscreen(elem: HTMLElement) {
+    if (!document.fullscreenElement) {
+      // Intentar entrar en pantalla completa
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if ((elem as any).webkitRequestFullscreen) { /* Safari/iOS */
+        (elem as any).webkitRequestFullscreen();
+      } else if ((elem as any).msRequestFullscreen) { /* IE11 */
+        (elem as any).msRequestFullscreen();
+      }
+    } else {
+      // Salir de pantalla completa
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
     }
   }
 }
