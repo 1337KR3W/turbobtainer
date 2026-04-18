@@ -33,7 +33,7 @@ export class DownloadManagerComponent {
   @Output() analyze = new EventEmitter<'audio' | 'video' | 'gallery'>();
   @Output() download = new EventEmitter<void>();
   @Output() cancelDld = new EventEmitter<void>();
-
+  public selectedEpisode: any = null;
   constructor() {
 
     this.utils.initializeIcons();
@@ -44,13 +44,7 @@ export class DownloadManagerComponent {
     return this.tauri.state().status;
   }
 
-  getSafeUrl(): SafeResourceUrl | null {
-    const stream = this.animeService.state().currentStream;
-    if (stream && stream.url) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(stream.url);
-    }
-    return null;
-  }
+
 
   async pruebaAnime() {
     console.log('--- PASO 1: Buscando Anime ---');
@@ -135,16 +129,22 @@ export class DownloadManagerComponent {
 
   // Método para reproducir un episodio
   async playEpisode(episode: any) {
+    this.selectedEpisode = episode; // Guardamos el episodio seleccionado
     this.viewMode = 'PLAYER';
     await this.animeService.getStream(episode.url);
   }
 
   // Volver atrás
   goBack() {
-    if (this.viewMode === 'PLAYER') this.viewMode = 'EPISODES';
+    if (this.viewMode === 'PLAYER') {
+      // Si estamos en el video, volvemos a la lista de episodios
+      this.viewMode = 'EPISODES';
+      // Limpiamos el stream actual para que el iframe deje de existir
+      this.animeService.resetStream(); // Opcional, pero recomendado
+    }
     else if (this.viewMode === 'EPISODES') {
+      // Si estamos en episodios, volvemos a los resultados de búsqueda
       this.viewMode = 'SEARCH';
-      this.animeService.reset(); // Opcional: limpiar episodios
     }
   }
 
@@ -168,5 +168,6 @@ export class DownloadManagerComponent {
       this.animeService.reset();
     }
   }
+
 
 }

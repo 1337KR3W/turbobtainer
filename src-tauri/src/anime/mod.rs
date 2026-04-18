@@ -3,8 +3,6 @@ use scraper::{Html, Selector};
 use reqwest::header::USER_AGENT;
 use regex::Regex;
 
-// --- Modelos de Datos (Coinciden con anime.model.ts) ---
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Anime {
     pub title: String,

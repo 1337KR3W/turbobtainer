@@ -1,4 +1,40 @@
-<div class="video-container">
-    <video #videoPlayer class="video-js vjs-big-play-centered" controls preload="auto" width="800" height="450">
-    </video>
-</div>
+@if (stream) {
+<ion-card class="video-card ion-no-margin">
+    <ion-item lines="none" class="video-header">
+        <ion-button slot="start" fill="clear" color="medium" (click)="back.emit()">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            <ion-label class="ion-padding-start">Back</ion-label>
+        </ion-button>
+        <ion-label>
+            <h2 class="text-white">{{ animeTitle }}</h2>
+            <p>Capítulo {{ episodeNumber }}</p>
+        </ion-label>
+        <ion-badge slot="end" color="primary">{{ stream.server }}</ion-badge>
+    </ion-item>
+
+    <ion-card-content class="ion-no-padding">
+        <div class="iframe-wrapper">
+            @if (getSafeUrl(); as safeUrl) {
+            <iframe [src]="safeUrl" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen>
+            </iframe>
+            } @else {
+            <div class="loading-placeholder">
+                <ion-spinner name="crescent"></ion-spinner>
+                <p>Preparando stream...</p>
+            </div>
+            }
+        </div>
+    </ion-card-content>
+
+    <ion-item lines="none" class="video-footer">
+        <ion-icon name="information-circle-outline" slot="start" color="medium"></ion-icon>
+        <ion-label>
+            <p>Si el video no carga, intenta abrirlo en el navegador.</p>
+        </ion-label>
+        <ion-button slot="end" fill="outline" size="small" [href]="stream.url" target="_blank">
+            <ion-icon name="open-outline" slot="start"></ion-icon>
+            Link Externo
+        </ion-button>
+    </ion-item>
+</ion-card>
+}

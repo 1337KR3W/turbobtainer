@@ -1,43 +1,35 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect, inject } from '@angular/core';
-import videojs from 'video.js';
-import { AnimeService } from '../../services/anime.service';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { IonButton, IonIcon, IonCard, IonItem, IonLabel, IonBadge, IonCardContent, IonSpinner } from '@ionic/angular/standalone';
+import { StreamSource } from '../../models/anime.model';
 
 @Component({
   selector: 'app-video-player',
   standalone: true,
+  imports: [CommonModule, IonButton, IonIcon, IonCard, IonItem, IonLabel, IonBadge, IonCardContent, IonSpinner],
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.scss']
 })
-export class VideoPlayerComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('videoPlayer') videoElement!: ElementRef;
-  private readonly animeService = inject(AnimeService);
-  player: any;
+export class VideoPlayerComponent {
+  private readonly sanitizer = inject(DomSanitizer);
 
-  constructor() {
-    // Escuchamos los cambios en el stream mediante un effect
-    effect(() => {
-      const stream = this.animeService.state().currentStream;
-      if (stream && this.player) {
-        this.player.src({
-          src: stream.url,
-          type: stream.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
-        });
-        this.player.play();
-      }
-    });
-  }
+  // Definimos qué datos puede recibir de download-manager
+  @Input() stream: StreamSource | null = null;
+  @Input() animeTitle: string = '';
+  @Input() episodeNumber: string | number = '';
 
-  ngAfterViewInit() {
-    this.player = videojs(this.videoElement.nativeElement, {
-      fluid: true,
-      autoplay: false,
-      controls: true
-    });
-  }
+  // Definimos el evento para avisar que queremos cerrar el video
+  @Output() back = new EventEmitter<void>();
 
-  ngOnDestroy() {
-    if (this.player) {
-      this.player.dispose();
+  // La lógica del SafeUrl se queda AQUÍ, liberando al componente principal
+  getSafeUrl(): SafeResourceUrl | null {
+    if (this.stream?.url) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(this.stream.url);
     }
+    return null;
+  }
+  onBackClick() {
+    this.back.emit();
   }
 }
