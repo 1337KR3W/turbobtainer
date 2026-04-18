@@ -105,7 +105,7 @@ pub async fn get_anime_episodes(url: String) -> Result<Vec<Episode>, String> {
     
     // Capturamos el ID de la serie para reconstruir la URL (AnimeFLV lo necesita)
     // Suele estar en: var anime_info = ["ID", "Titulo", "slug"];
-    let re_info = Regex::new(r###"var anime_info = \["(\d+)",\s*"([^"]+)",\s*"([^"]+)"\];"###).unwrap();
+    let _re_info = Regex::new(r###"var anime_info = \["(\d+)",\s*"([^"]+)",\s*"([^"]+)"\];"###).unwrap();
     
     let mut episodes_list = Vec::new();
 
@@ -137,58 +137,55 @@ pub async fn get_anime_episodes(url: String) -> Result<Vec<Episode>, String> {
     Ok(episodes_list)
 }
 
-
-
 #[tauri::command]
 pub async fn get_stream_link(url: String) -> Result<StreamSource, String> {
-    let client = reqwest::Client::new();
-    let response = client
-        .get(&url)
-        .header(USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-        .send()
-        .await
-        .map_err(|e| e.to_string())?
-        .text()
-        .await
-        .map_err(|e| e.to_string())?;
+    let client = reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .build().map_err(|e| e.to_string())?;
 
-    // 1. Buscamos el objeto JSON de servidores en el script
+    let res = client.get(&url).send().await.map_err(|e| e.to_string())?.text().await.map_err(|e| e.to_string())?;
     let re_videos = Regex::new(r"var videos = (\{.*\});").unwrap();
+    let caps = re_videos.captures(&res).ok_or("No se encontraron servidores")?;
+    let v: serde_json::Value = serde_json::from_str(&caps[1]).map_err(|e| e.to_string())?;
+
+    let servers = v["SUB"].as_array().ok_or("No hay lista de servidores")?;
     
-    if let Some(caps) = re_videos.captures(&response) {
-        let json_data = &caps[1];
-        let v: serde_json::Value = serde_json::from_str(json_data).map_err(|e| e.to_string())?;
+    for s in servers {
+        let server_id = s["server"].as_str().unwrap_or("");
+        let iframe_url = s["code"].as_str().unwrap_or("");
 
-        // 2. AnimeFLV tiene una lista de servidores bajo la clave "SUB" (subtitulado)
-        if let Some(sub_servers) = v["SUB"].as_array() {
-            for s in sub_servers {
-                let server_name = s["server"].as_str().unwrap_or("");
-                let code_url = s["code"].as_str().unwrap_or("");
+        if server_id == "sw" {
+            // --- NUEVA ESTRATEGIA: EXTRAER ID ---
+            // El ID está al final de: https://streamwish.to/e/vi3iu795r3h6
+            let video_id = iframe_url.split('/').last().unwrap_or("");
+            
+            // Intentamos construir el link directo que suelen usar sus CDNs
+            // Nota: Este patrón cambia a veces, pero es el más estable
+            let direct_url = format!("https://awentub.com/stream/{}/master.m3u8", video_id);
 
-                // Por ahora, busquemos un servidor compatible con streaming directo
-                // 'vidoza' suele ser muy amigable para extraer el .mp4
-                if server_name == "vidoza" {
-                    // El "code" suele ser un link al iframe. 
-                    // Necesitaríamos entrar en ese link para sacar el video, 
-                    // pero por ahora devolvamos el link del iframe para probar que lo detectamos.
+            // Verificamos si el link responde bien (HEAD request para no bajar todo el archivo)
+            let check = client.head(&direct_url)
+                .header("Referer", "https://streamwish.to/")
+                .send().await;
+
+            if let Ok(response) = check {
+                if response.status().is_success() {
                     return Ok(StreamSource {
-                        server: "Vidoza".to_string(),
-                        url: code_url.to_string(),
-                        quality: Some("720p".to_string()),
+                        server: "Streamwish_Direct".to_string(),
+                        url: direct_url,
+                        quality: Some("Auto".to_string()),
                     });
                 }
             }
             
-            // Si no hay Vidoza, devolvemos el primero que encontremos como fallback
-            if let Some(first) = sub_servers.get(0) {
-                return Ok(StreamSource {
-                    server: first["server"].as_str().unwrap_or("Unknown").to_string(),
-                    url: first["code"].as_str().unwrap_or("").to_string(),
-                    quality: None,
-                });
-            }
+            // Si el "adivinar" falla, devolvemos el iframe como último recurso
+            // pero esta vez nos aseguramos de que el Frontend lo maneje
+            return Ok(StreamSource {
+                server: "Streamwish_Iframe".to_string(),
+                url: iframe_url.to_string(), // https://streamwish.to/e/vi3iu795r3h6
+                quality: None,
+            });
         }
     }
-
-    Err("No se encontraron servidores de video disponibles".into())
+    Err("Servidor no compatible".into())
 }

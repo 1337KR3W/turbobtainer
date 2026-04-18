@@ -6,13 +6,15 @@ import { UtilsService } from '../../services/utils.service';
 import { SupportGrid } from '../support-grid/support-grid';
 import { TauriService } from '../../services/tauri.service';
 import { AnimeService } from '../../services/anime.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { VideoPlayerComponent } from "../video-player/video-player.component";
 
 @Component({
   selector: 'app-download-manager',
   standalone: true,
   imports: [CommonModule, FormsModule, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonItem, IonInput, IonButton, IonIcon, IonRow, IonCol,
-    IonSpinner, IonProgressBar, IonCardSubtitle, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter],
+    IonSpinner, IonProgressBar, IonCardSubtitle, IonLabel, IonGrid, IonList, IonThumbnail, IonFooter, VideoPlayerComponent],
   templateUrl: './download-manager.component.html',
   styleUrls: ['./download-manager.component.scss']
 })
@@ -20,7 +22,8 @@ export class DownloadManagerComponent {
 
   private readonly utils = inject(UtilsService);
   public readonly tauri = inject(TauriService);
-
+  public animeService = inject(AnimeService);
+  private readonly sanitizer = inject(DomSanitizer);
   public readonly supportedPlatforms = this.utils.MASTER_SITES;
 
   @Input() url: string = '';
@@ -29,7 +32,7 @@ export class DownloadManagerComponent {
   @Output() download = new EventEmitter<void>();
   @Output() cancelDld = new EventEmitter<void>();
 
-  constructor(private readonly animeService: AnimeService) {
+  constructor() {
 
     this.utils.initializeIcons();
     this.utils.setRandomAscii();
@@ -37,6 +40,14 @@ export class DownloadManagerComponent {
 
   get status() {
     return this.tauri.state().status;
+  }
+
+  getSafeUrl(): SafeResourceUrl | null {
+    const stream = this.animeService.state().currentStream;
+    if (stream && stream.url) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(stream.url);
+    }
+    return null;
   }
 
   async pruebaAnime() {
@@ -47,7 +58,8 @@ export class DownloadManagerComponent {
     console.log('Resultados encontrados:', resultados);
 
     if (resultados.length > 0) {
-      const primeraSerie = resultados[1]; // Usamos resultados[1] para la Temporada 1 como vimos antes
+      // Usamos el índice [1] como acordamos para evitar la versión coreana/live action si aplica
+      const primeraSerie = resultados[1] || resultados[0];
       console.log(`--- PASO 2: Obteniendo capítulos de: ${primeraSerie.title} ---`);
 
       await this.animeService.getEpisodes(primeraSerie.url);
@@ -57,27 +69,32 @@ export class DownloadManagerComponent {
       if (episodios.length > 0) {
         console.log('✅ TEST EXITOSO (Capítulos)');
 
-        // --- AQUÍ EMPIEZA EL PASO 3 (EL NUEVO) ---
         const primerEpisodio = episodios[0];
-        console.log(`--- PASO 3: Extrayendo link de video del cap: ${primerEpisodio.number} ---`);
-        console.log('URL del episodio:', primerEpisodio.url);
+        console.log(`--- PASO 3: Extrayendo video de: Cap ${primerEpisodio.number} ---`);
 
-        // Llamamos a la nueva función que acabas de poner en Rust
+        // Ejecutamos la lógica de Rust
         await this.animeService.getStream(primerEpisodio.url);
 
+        // Obtenemos el resultado del estado
         const stream = this.animeService.state().currentStream;
-        if (stream) {
-          console.log('✅ TEST EXITOSO (Stream): Servidor y Link detectados:', stream);
+
+        if (stream && stream.url) {
+          if (stream.server === 'Streamwish_Direct') {
+            console.log('🔥 ¡SÚPER ÉXITO! Link directo obtenido:', stream.url);
+            console.log('Este link debería cargar directamente en Video.js');
+          } else {
+            console.log('✅ TEST EXITOSO (Modo Iframe):', stream);
+            console.log('Cargando el reproductor embebido original...');
+          }
         } else {
-          console.log('❌ TEST FALLIDO (Stream): No se pudo obtener el servidor.');
+          console.error('❌ TEST FALLIDO: El servicio devolvió un objeto vacío o nulo.');
         }
-        // ----------------------------------------
 
       } else {
-        console.log('❌ TEST FALLIDO: La lista de episodios está vacía.');
+        console.log('❌ TEST FALLIDO: No hay episodios disponibles.');
       }
     } else {
-      console.log('⚠️ No se encontraron series.');
+      console.log('⚠️ No se encontraron series en la búsqueda.');
     }
   }
 
