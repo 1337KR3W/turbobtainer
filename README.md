@@ -17,7 +17,7 @@ Turbobtainer is a high-performance desktop application designed for seamless mul
 # Content
   
   - [Latest Release](#Latest-Release)
-  - [Key Features v1.2.5](#Key-Features-v130)
+  - [Key Features v1.3.0](#Key-Features-v130)
   - [Technology Stack](#Technology-Stack)
     - [**Core Architecture**](#Core-Architecture)
     - [**Frontend**](#Frontend)
