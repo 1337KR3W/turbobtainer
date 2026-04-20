@@ -1,18 +1,18 @@
 @if (state.status === 'DOWNLOADING') {
 <ion-card class="turbo-card-container">
     <ion-card-header>
-        <ion-card-title>Downloading {{ state.tipoSeleccionado }}...</ion-card-title>
+        <ion-card-title>Downloading {{ state.selectedType }}...</ion-card-title>
         <ion-card-subtitle>{{ state.videoTitle }}</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
-        <ion-progress-bar [type]="state.progreso && state.progreso > 0 ? 'determinate' : 'indeterminate'"
-            [value]="state.progreso || 0">
+        <ion-progress-bar [type]="state.progress && state.progress > 0 ? 'determinate' : 'indeterminate'"
+            [value]="state.progress || 0">
         </ion-progress-bar>
 
         <div class="ion-margin-top ion-text-center">
             <h1 class="progress-text">
-                {{ (state.progreso || 0) * 100 | number:'1.0-0' }}%
+                {{ (state.progress || 0) * 100 | number:'1.0-0' }}%
             </h1>
         </div>
 
@@ -47,7 +47,7 @@
         <ion-icon name="alert-circle-outline" slot="start" class="error-icon"></ion-icon>
         <ion-label class="ion-text-wrap">
             <strong class="error-title">System Error</strong>
-            <p class="error-msg">{{ state.mensaje }}</p>
+            <p class="error-msg">{{ state.message }}</p>
         </ion-label>
     </ion-item>
     <ion-button (click)="cancel.emit()" fill="clear" expand="block" class="btn-retry">

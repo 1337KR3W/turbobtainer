@@ -1,5 +1,5 @@
 @if (tauri.state().status === 'IDLE' || tauri.state().status === 'ANALYZING') {
-<app-search-manager [url]="url" [status]="tauri.state().status" [tipoSeleccionado]="tauri.state().tipoSeleccionado"
+<app-search-manager [url]="url" [status]="tauri.state().status" [selectedType]="tauri.state().selectedType"
     [animeCount]="animeService.results().length" [isVideo]="isVideoUrl()" [isGallery]="isGalleryUrl()"
     (urlChange)="onInputChange($event)" (analyze)="analyze.emit($event)" (openAnime)="viewMode = 'SEARCH'"
     (openSupport)="openSupportModal()" (randomBg)="setRandomBackGround()">

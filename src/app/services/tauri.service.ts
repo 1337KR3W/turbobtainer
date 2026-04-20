@@ -15,36 +15,25 @@ export class TauriService implements OnDestroy {
   private readonly injector = inject(Injector);
 
   constructor() {
-
     this.setupListeners();
-    this.testGallery();
-  }
-
-  async testGallery() {
-    try {
-      const version = await invoke('check_gallery_binary');
-      console.log('Gallery-dl Version:', version);
-    } catch (error) {
-      console.error('Error calling sidecar:', error);
-    }
   }
 
   private async setupListeners() {
     try {
       this.unlistenProgress = await listen<number>('download-progress', (event) => {
-        const progreso = event.payload;
+        const progress = event.payload;
 
-        if (progreso === 1) {
+        if (progress === 1) {
           this._state.update(s => ({
             ...s,
             status: 'SUCCESS',
-            progreso: 1
+            progress: 1
           }));
         } else {
           this._state.update(s => ({
             ...s,
             status: 'DOWNLOADING',
-            progreso: progreso
+            progress: progress
           }));
         }
       });
@@ -52,25 +41,25 @@ export class TauriService implements OnDestroy {
       console.error('Error:', error);
     }
   }
-  async getMetadata(url: string, tipo: 'audio' | 'video') {
+  async getMetadata(url: string, type: 'audio' | 'video') {
     this.urlMemoria = url;
-    this._state.set({ status: 'ANALYZING', tipoSeleccionado: tipo });
+    this._state.set({ status: 'ANALYZING', selectedType: type });
 
     try {
       const metadata = await invoke<any>('check_video_url', { url });
       this._state.set({
         status: 'READY',
-        tipoSeleccionado: tipo,
+        selectedType: type,
         videoTitle: metadata.title,
         thumbnail: metadata.thumbnail,
         duration: metadata.duration,
         size: metadata.size,
-        progreso: 0
+        progress: 0
       });
     } catch (error) {
       this._state.set({
         status: 'ERROR',
-        mensaje: error as string
+        message: error as string
       });
     }
   }
@@ -81,7 +70,7 @@ export class TauriService implements OnDestroy {
 
     this._state.set({
       status: 'ANALYZING',
-      tipoSeleccionado: 'gallery',
+      selectedType: 'gallery',
       thumbnail: undefined
     });
 
@@ -90,26 +79,26 @@ export class TauriService implements OnDestroy {
 
       this._state.set({
         status: 'READY',
-        tipoSeleccionado: 'gallery',
+        selectedType: 'gallery',
         videoTitle: metadata.title,
         sourceLogo: logo,
         imageCount: metadata.count,
-        mensaje: metadata.description,
-        progreso: 0
+        message: metadata.description,
+        progress: 0
       });
     } catch (error) {
       this._state.set({
         status: 'ERROR',
-        mensaje: error as string
+        message: error as string
       });
     }
   }
 
-  async checkUrlType(url: string, tipo: 'audio' | 'video' | 'gallery') {
-    if (tipo === 'gallery') {
+  async checkUrlType(url: string, type: 'audio' | 'video' | 'gallery') {
+    if (type === 'gallery') {
       return this.getMetadataGallery(url);
     } else {
-      return this.getMetadata(url, tipo);
+      return this.getMetadata(url, type);
     }
   }
 
@@ -117,10 +106,10 @@ export class TauriService implements OnDestroy {
     const actual = this._state();
     if (actual.status !== 'READY') return;
 
-    this._state.update(s => ({ ...s, status: 'DOWNLOADING', progreso: 0 }));
+    this._state.update(s => ({ ...s, status: 'DOWNLOADING', progress: 0 }));
 
     try {
-      if (actual.tipoSeleccionado === 'gallery') {
+      if (actual.selectedType === 'gallery') {
         const totalItems = actual.imageCount || 0;
         const resultado = await invoke<string>('download_gallery', {
           url: this.urlMemoria,
@@ -131,19 +120,19 @@ export class TauriService implements OnDestroy {
         this._state.update(s => ({
           ...s,
           status: 'SUCCESS',
-          progreso: 1
+          progress: 1
         }));
 
       } else {
         await invoke('download_video', {
           url: this.urlMemoria,
-          tipo: actual.tipoSeleccionado
+          stype: actual.selectedType
         });
       }
 
     } catch (error) {
       console.error('Error en la descarga:', error);
-      this._state.set({ status: 'ERROR', mensaje: error as string });
+      this._state.set({ status: 'ERROR', message: error as string });
     }
   }
 
