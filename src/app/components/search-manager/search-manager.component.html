@@ -16,7 +16,7 @@
                 <ion-button expand="block" class="btn-primary" (click)="analyze.emit('audio')"
                     [disabled]="status === 'ANALYZING' || !url || !isVideo">
                     @if (status === 'ANALYZING' && selectedType === 'audio') {
-                    <ion-spinner name="dots" class="spinner-audio"></ion-spinner>
+                    <ion-spinner name="dots" class="spinner-video"></ion-spinner>
                     } @else {
                     <ion-icon name="musical-notes-outline" slot="start"></ion-icon> Audio
                     }
