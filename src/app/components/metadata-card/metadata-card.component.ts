@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonCard, IonGrid, IonRow, IonCol, IonList, IonItem,
-  IonLabel, IonThumbnail, IonFooter, IonButton, IonIcon
+  IonLabel, IonThumbnail, IonFooter, IonButton, IonIcon, IonToggle
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -10,7 +10,7 @@ import {
   standalone: true,
   imports: [
     CommonModule, IonCard, IonGrid, IonRow, IonCol, IonList,
-    IonItem, IonLabel, IonThumbnail, IonFooter, IonButton, IonIcon
+    IonItem, IonLabel, IonThumbnail, IonFooter, IonButton, IonIcon, IonToggle
   ],
   templateUrl: './metadata-card.component.html',
   styleUrls: ['./metadata-card.component.scss']
@@ -22,4 +22,5 @@ export class MetadataCardComponent {
   // Eventos para comunicar acciones al padre
   @Output() download = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
+  @Output() playlistToggle = new EventEmitter<boolean>();
 }

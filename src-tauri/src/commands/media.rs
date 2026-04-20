@@ -8,7 +8,8 @@ pub struct VideoMetadata {
     pub title: String,
     pub thumbnail: String,
     pub duration: String,
-    pub size: String
+    pub size: String,
+    pub has_playlist: bool
 }
 
 #[derive(serde::Deserialize)]
@@ -18,6 +19,7 @@ struct YtDlpOutput {
     duration_string: Option<String>,
     filesize: Option<f64>,
     filesize_approx: Option<f64>,
+    playlist_title: Option<String>
 }
 
 fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
@@ -64,7 +66,7 @@ fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
 #[tauri::command]
 pub async fn check_video_url(app: AppHandle, url: String) -> Result<VideoMetadata, String> {
     if url.trim().is_empty() { return Err("URL empty".into()); }
-
+    let has_playlist = url.contains("youtube.com") && url.contains("list=");
     let output = app.shell().sidecar("yt-dlp")
         .map_err(|e| format!("Engine error: {}", e))?
         .args([
@@ -72,7 +74,7 @@ pub async fn check_video_url(app: AppHandle, url: String) -> Result<VideoMetadat
             "--no-warnings",
             "--no-playlist",
             "--skip-download",
-            "--dump-json", // <-- Esto genera un JSON perfecto y válido siempre
+            "--dump-json",
             &url
         ])
         .output().await
@@ -96,33 +98,47 @@ pub async fn check_video_url(app: AppHandle, url: String) -> Result<VideoMetadat
         thumbnail: raw.thumbnail.unwrap_or_default(),
         duration: raw.duration_string.unwrap_or_else(|| "00:00".into()),
         size: format!("{:.2} MB", size_bytes / 1048576.0),
+        has_playlist,
     })
 }
 
 #[tauri::command]
-pub async fn download_video(app: AppHandle, url: String, stype: String) -> Result<String, String> {
+pub async fn download_video(app: AppHandle, url: String, stype: String, download_playlist: bool) -> Result<String, String> {
     let ffmpeg_path = get_ffmpeg_path(&app)?;
     let download_dir = app.path().download_dir().map_err(|e| e.to_string())?;
     
-    // Simplificamos la creación de la ruta de salida
-    let output_tmpl = download_dir
-        .join("%(title).150s_Turbobtainer_%(epoch)s.%(ext)s")
-        .to_string_lossy()
-        .to_string();
+    let output_tmpl = if download_playlist {
+        download_dir
+            .join("Turbobtainer_%(epoch)s")
+            .join("%(playlist_title).100s")
+            .join("%(title).100s.%(ext)s")
+    } else {
+        download_dir.join("%(title).150s_Turbobtainer_%(epoch)s.%(ext)s")
+    };
+
+    let output_str = output_tmpl.to_string_lossy().to_string();
 
     let mut args = vec![
         "--newline", "--progress",
         "--progress-template", "PROG:%(progress._percent_str)s",
-        "-o", &output_tmpl,
-        "--ffmpeg-location", ffmpeg_path.to_str().ok_or("Invalid FFmpeg path")?,
+        "-o", &output_str,
+        "--ffmpeg-location", ffmpeg_path.to_str().ok_or("Invalid path")?,
+        "--restrict-filenames",
     ];
 
-    // Lógica de formato simplificada
+    // Lógica crucial: Si NO quiere playlist, hay que decírselo explícitamente a yt-dlp
+    if !download_playlist {
+        args.push("--no-playlist");
+    } else {
+        args.push("--yes-playlist");
+    }
+
     if stype == "audio" {
         args.extend(["-x", "--audio-format", "mp3", "--audio-quality", "0"]);
     } else {
         args.extend(["-f", "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b", "--merge-output-format", "mp4"]);
     }
+    
     args.push(&url);
 
     let (mut rx, _) = app.shell().sidecar("yt-dlp")

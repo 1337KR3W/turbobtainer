@@ -9,6 +9,8 @@ export interface AppState {
     sourceLogo?: string;
     duration?: string;
     size?: string;
+    hasPlaylist?: boolean;
+    shouldDownloadPlaylist?: boolean;
     imageCount?: number;
     progress?: number;
 }

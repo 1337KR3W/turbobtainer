@@ -18,7 +18,8 @@ import {
     arrowBackOutline,
     openOutline,
     expandOutline,
-    informationCircleOutline
+    informationCircleOutline,
+    listOutline
 } from 'ionicons/icons';
 import { TauriService } from './tauri.service';
 import { ModalController } from '@ionic/angular/standalone';
@@ -57,7 +58,8 @@ export class UtilsService {
             'arrow-back-outline': arrowBackOutline,
             'open-outline': openOutline,
             'expand-outline': expandOutline,
-            'information-circle-outline': informationCircleOutline
+            'information-circle-outline': informationCircleOutline,
+            'list-outline': listOutline
 
         });
     }

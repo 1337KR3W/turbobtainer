@@ -7,7 +7,8 @@
 }
 
 @else if (tauri.state().status === 'READY') {
-<app-metadata-card [state]="tauri.state()" (download)="download.emit()" (cancel)="cancelDld.emit()">
+<app-metadata-card [state]="tauri.state()" (download)="download.emit()" (cancel)="cancelDld.emit()"
+    (playlistToggle)="tauri.togglePlaylist($event)">
 </app-metadata-card>
 }
 
