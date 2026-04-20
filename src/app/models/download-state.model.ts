@@ -11,6 +11,7 @@ export interface AppState {
     size?: string;
     hasPlaylist?: boolean;
     shouldDownloadPlaylist?: boolean;
+    isProcesing?: boolean;
     imageCount?: number;
     progress?: number;
 }

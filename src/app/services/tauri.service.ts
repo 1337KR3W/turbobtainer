@@ -20,16 +20,31 @@ export class TauriService implements OnDestroy {
 
   private async setupListeners() {
     try {
-      this.unlistenProgress = await listen<number>('download-progress', (event) => {
-        const progress = event.payload;
+      // Escucha el nombre real de la Playlist
+      await listen<string>('playlist-title', (event) => {
         this._state.update(s => ({
           ...s,
-          status: progress === 1 ? 'SUCCESS' : 'DOWNLOADING',
-          progress: progress
+          videoTitle: event.payload // Sobrescribimos el título del video por el de la playlist
         }));
       });
+
+      // Listener para el título del item individual
+      await listen<string>('item-title', (event) => {
+        this._state.update(s => ({ ...s, current_item_title: event.payload }));
+      });
+
+      // Listener para el progreso
+      this.unlistenProgress = await listen<number>('download-progress', (event) => {
+        this._state.update(s => ({ ...s, progress: event.payload }));
+      });
+
+      // Listener para finalizar
+      await listen<boolean>('download-finished', (_) => {
+        this._state.update(s => ({ ...s, status: 'SUCCESS', progress: 1 }));
+      });
+
     } catch (error) {
-      console.error('Listener setup error:', error);
+      console.error(error);
     }
   }
 
@@ -107,7 +122,7 @@ export class TauriService implements OnDestroy {
     const current = this._state(); // Renombrado de actual
     if (current.status !== 'READY') return;
 
-    this._state.update(s => ({ ...s, status: 'DOWNLOADING', progress: 0 }));
+    this._state.update(s => ({ ...s, status: 'DOWNLOADING', progress: 0, current_item_title: '' }));
 
     try {
       if (current.selectedType === 'gallery') {
@@ -140,6 +155,23 @@ export class TauriService implements OnDestroy {
   ngOnDestroy() {
     if (this.unlistenProgress) {
       this.unlistenProgress();
+    }
+  }
+
+  async stopDownload() {
+    try {
+      await invoke('stop_download');
+      this._state.update(s => ({
+        ...s,
+        status: 'IDLE',
+        progress: 0,
+        current_item_title: undefined
+      }));
+
+    } catch (error) {
+      console.error('Downloading error:', error);
+
+      this.reset();
     }
   }
 }

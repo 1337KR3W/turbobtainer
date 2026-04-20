@@ -1,8 +1,8 @@
 use std::path::PathBuf;
-
+use std::sync::Mutex;
+use tauri_plugin_shell::process::{CommandEvent, CommandChild}; 
 use tauri_plugin_shell::ShellExt;
-use tauri::{AppHandle, Emitter, Manager};
-
+use tauri::{AppHandle, Manager, Emitter};
 #[derive(serde::Serialize)]
 pub struct VideoMetadata {
     pub title: String,
@@ -18,18 +18,30 @@ struct YtDlpOutput {
     thumbnail: Option<String>,
     duration_string: Option<String>,
     filesize: Option<f64>,
-    filesize_approx: Option<f64>,
-    playlist_title: Option<String>
+    filesize_approx: Option<f64>
+}
+
+pub struct DownloadState {
+    // Cambiado Child -> CommandChild
+    pub child: Mutex<Option<CommandChild>>, 
+}
+
+// Inicialización por defecto para el main.rs
+impl Default for DownloadState {
+    fn default() -> Self {
+        Self {
+            child: Mutex::new(None),
+        }
+    }
 }
 
 fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
     let target_triple = tauri::utils::platform::target_triple().unwrap_or_default();
     let ffmpeg_name = format!("ffmpeg-{}.exe", target_triple);
 
-    // --- CASO A: MODO DESARROLLO (debug) ---
+    // CASE A: DEVELOP (debug) ---
     #[cfg(debug_assertions)]
     {
-        // En dev, forzamos la ruta absoluta hacia tu carpeta de proyecto
         let dev_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("bin")
             .join(&ffmpeg_name);
@@ -39,18 +51,15 @@ fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
         }
     }
 
-    // --- CASO B: MODO PRODUCCIÓN (release) ---
+    // CASE B: PRODUCTION (release) ---
     #[cfg(not(debug_assertions))]
     {
-        // 1. Intentar al lado del ejecutable (Instalación plana)
         if let Ok(exe_path) = std::env::current_exe() {
             if let Some(exe_dir) = exe_path.parent() {
                 let prod_path = exe_dir.join(&ffmpeg_name);
                 if prod_path.exists() { return Ok(prod_path); }
             }
         }
-
-        // 2. Intentar carpeta de recursos (Estructura estándar de Tauri bundle)
         let res_path = app.path().resource_dir()
             .unwrap_or_default()
             .join("_up_")
@@ -103,30 +112,43 @@ pub async fn check_video_url(app: AppHandle, url: String) -> Result<VideoMetadat
 }
 
 #[tauri::command]
-pub async fn download_video(app: AppHandle, url: String, stype: String, download_playlist: bool) -> Result<String, String> {
+pub async fn download_video(
+    app: AppHandle,
+    state: tauri::State<'_, DownloadState>,
+    url: String,
+    stype: String,
+    download_playlist: bool,
+) -> Result<String, String> {
     let ffmpeg_path = get_ffmpeg_path(&app)?;
     let download_dir = app.path().download_dir().map_err(|e| e.to_string())?;
+
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
     
+    let folder_name = format!("Turbobtainer_{}", timestamp);
+
     let output_tmpl = if download_playlist {
         download_dir
-            .join("Turbobtainer_%(epoch)s")
+            .join(&folder_name)
             .join("%(playlist_title).100s")
             .join("%(title).100s.%(ext)s")
     } else {
-        download_dir.join("%(title).150s_Turbobtainer_%(epoch)s.%(ext)s")
+        download_dir.join(format!("%(title).150s_{}.%(ext)s", folder_name))
     };
 
     let output_str = output_tmpl.to_string_lossy().to_string();
 
     let mut args = vec![
-        "--newline", "--progress",
-        "--progress-template", "PROG:%(progress._percent_str)s",
+        "--newline",
+        "--progress",
+        "--progress-template", "PROG:%(progress._percent_str)s | TITLE:%(info.title)s",
         "-o", &output_str,
         "--ffmpeg-location", ffmpeg_path.to_str().ok_or("Invalid path")?,
         "--restrict-filenames",
     ];
 
-    // Lógica crucial: Si NO quiere playlist, hay que decírselo explícitamente a yt-dlp
     if !download_playlist {
         args.push("--no-playlist");
     } else {
@@ -141,37 +163,49 @@ pub async fn download_video(app: AppHandle, url: String, stype: String, download
     
     args.push(&url);
 
-    let (mut rx, _) = app.shell().sidecar("yt-dlp")
+    // 1. Cambiamos _child por child (sin el guion bajo) para poder usarlo
+    let (mut rx, child) = app.shell().sidecar("yt-dlp")
         .map_err(|e| e.to_string())?
         .args(args)
         .spawn()
         .map_err(|e| e.to_string())?;
-
-    // --- PROCESAMIENTO DE EVENTOS ---
+    
+    // 2. Guardamos el proceso hijo en el estado global para que STOP pueda matarlo
+    {
+        let mut lock = state.child.lock().unwrap();
+        *lock = Some(child); 
+    }
+    
+    // 3. Manejo de eventos en segundo plano
     tauri::async_runtime::spawn(async move {
-        let mut last_emit = 0.0; // Para evitar saturación si quisieras filtrar por umbral
-
         while let Some(event) = rx.recv().await {
             match event {
-                tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
+                CommandEvent::Stdout(line) => {
                     let out = String::from_utf8_lossy(&line);
-                    
-                    // Búsqueda eficiente del patrón PROG:
-                    if let Some(pos) = out.find("PROG:") {
-                        let pct_str = &out[pos + 5..].trim_end_matches('%').trim();
-                        if let Ok(pct) = pct_str.parse::<f32>() {
-                            let current_prog = (pct / 100.0).min(0.99);
-                            // Solo emitimos si hay un cambio real significativo (ej. > 1%)
-                            if current_prog > last_emit + 0.01 || current_prog >= 0.99 {
-                                let _ = app.emit("download-progress", current_prog);
-                                last_emit = current_prog;
-                            }
+    
+                    if out.contains("Downloading playlist:") {
+                        if let Some(playlist_name) = out.split("Downloading playlist: ").last() {
+                            let _ = app.emit("playlist-title", playlist_name.trim());
+                        }
+                    }
+    
+                    if let Some(pos_prog) = out.find("PROG:") {
+                        let raw_pct = out[pos_prog + 5..].split('|').next().unwrap_or("").trim().trim_end_matches('%');
+                        if let Ok(pct) = raw_pct.parse::<f32>() {
+                            let _ = app.emit("download-progress", pct / 100.0);
+                        }
+                    }
+    
+                    if let Some(pos_title) = out.find("TITLE:") {
+                        let title = out[pos_title + 6..].trim();
+                        if !title.is_empty() {
+                            let _ = app.emit("item-title", title);
                         }
                     }
                 },
-                tauri_plugin_shell::process::CommandEvent::Terminated(payload) => {
+                CommandEvent::Terminated(payload) => {
                     if payload.code == Some(0) {
-                        let _ = app.emit("download-progress", 1.0);
+                        let _ = app.emit("download-finished", true);
                     }
                 },
                 _ => {}
@@ -180,4 +214,19 @@ pub async fn download_video(app: AppHandle, url: String, stype: String, download
     });
 
     Ok("Download started".into())
+}
+
+#[tauri::command]
+pub async fn stop_download(state: tauri::State<'_, DownloadState>) -> Result<(), String> {
+
+    let mut lock = state.child.lock().unwrap();
+    
+    if let Some(mut child) = lock.take() { 
+        child.kill().map_err(|e| format!("Error stopping process: {}", e))?;
+        println!("Exit aborting process.");
+    } else {
+        println!("Non active process to be stopped.");
+    }
+    
+    Ok(())
 }

@@ -1,12 +1,23 @@
 @if (state.status === 'DOWNLOADING') {
 <ion-card class="turbo-card-container">
     <ion-card-header>
-        <ion-card-title>Downloading {{ state.selectedType }}...</ion-card-title>
+        <ion-card-title class="text-red">
+            {{ state.hasPlaylist ? 'DOWNLOADING PLAYLIST...' : 'DOWNLOADING...' }}
+        </ion-card-title>
         <ion-card-subtitle>{{ state.videoTitle }}</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
-        <ion-progress-bar [type]="state.progress && state.progress > 0 ? 'determinate' : 'indeterminate'"
+        @if (state.current_item_title) {
+        <div class="current-item-box ion-padding-bottom">
+            <ion-label color="primary">
+                <ion-icon name="musical-note-outline" slot="start"></ion-icon>
+                <small class="text-red"> Processing: {{ state.current_item_title }}</small>
+            </ion-label>
+        </div>
+        }
+
+        <ion-progress-bar [type]="(state.progress !== undefined) ? 'determinate' : 'indeterminate'"
             [value]="state.progress || 0">
         </ion-progress-bar>
 
@@ -16,7 +27,8 @@
             </h1>
         </div>
 
-        <ion-button (click)="cancel.emit()" fill="outline" expand="block" class="btn-stop">
+        <ion-button (keyup.enter)="cancel.emit()" (click)="cancel.emit()" fill="outline" expand="block"
+            class="btn-stop ion-margin-top">
             Stop
         </ion-button>
     </ion-card-content>
@@ -33,7 +45,8 @@
             <p>The file is in your <strong>Downloads</strong> folder.</p>
         </div>
 
-        <ion-button (click)="cancel.emit()" expand="block" class="btn-primary ion-margin-top">
+        <ion-button (keyup.enter)="cancel.emit()" (click)="cancel.emit()" expand="block"
+            class="btn-primary ion-margin-top">
             <ion-icon name="refresh-outline" slot="start"></ion-icon>
             New download
         </ion-button>
@@ -50,7 +63,7 @@
             <p class="error-msg">{{ state.message }}</p>
         </ion-label>
     </ion-item>
-    <ion-button (click)="cancel.emit()" fill="clear" expand="block" class="btn-retry">
+    <ion-button (keyup.enter)="cancel.emit()" (click)="cancel.emit()" fill="clear" expand="block" class="btn-retry">
         Retry
     </ion-button>
 </ion-card>

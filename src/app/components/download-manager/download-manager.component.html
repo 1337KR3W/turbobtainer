@@ -13,7 +13,7 @@
 }
 
 @if (['DOWNLOADING', 'SUCCESS', 'ERROR'].includes(tauri.state().status)) {
-<app-download-status [state]="tauri.state()" (cancel)="cancelDld.emit()">
+<app-download-status [state]="tauri.state()" (cancel)="tauri.stopDownload()">
 </app-download-status>
 }
 <app-anime-manager [viewMode]="viewMode" [results]="animeService.results()" [episodes]="animeService.episodes()"

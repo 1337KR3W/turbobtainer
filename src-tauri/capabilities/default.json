@@ -6,6 +6,7 @@
     "main"
   ],
   "permissions": [
+    "shell:allow-execute",
     "core:default",
     "opener:default",
     "opener:allow-open-url",
