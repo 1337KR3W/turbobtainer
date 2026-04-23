@@ -34,44 +34,49 @@ impl Default for DownloadState {
     }
 }
 
-// RECUPERADA: Tu lógica exacta que funcionaba en la versión anterior
 fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
     let target_triple = tauri::utils::platform::target_triple().unwrap_or_default();
-    let ffmpeg_name = format!("ffmpeg-{}.exe", target_triple);
+    let sidecar_file = format!("ffmpeg-{}.exe", target_triple);
 
-    // 1. Intentamos la ruta de DESARROLLO (usando la variable de entorno de Cargo)
-    let mut ffmpeg_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+    // --- 1. RUTA DE DESARROLLO (Cargo) ---
+    let dev_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("bin")
-        .join(&ffmpeg_name);
+        .join(&sidecar_file);
+    if dev_path.exists() { return Ok(dev_path); }
 
-    // 2. Si no existe en Dev, buscamos con tu lógica de PRODUCCIÓN anterior
-    if !ffmpeg_path.exists() {
-        if let Ok(exe_path) = std::env::current_exe() {
-            if let Some(exe_dir) = exe_path.parent() {
-                // Opción A: Al lado del ejecutable
-                let prod_path = exe_dir.join(&ffmpeg_name);
-                
-                // Opción B: Carpeta de recursos con el salto "_up_" que te funcionaba
-                let resource_path = app.path().resource_dir()
-                    .unwrap_or_default()
-                    .join("_up_")
-                    .join("bin")
-                    .join(&ffmpeg_name);
+    // --- 2. RUTA DE PRODUCCIÓN (Junto al EXE) ---
+    // Usamos std::env::current_exe() pero lo normalizamos
+    if let Ok(mut exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            // Intento A: Nombre con triple (como está en tu carpeta de instalación)
+            let path_with_triple = exe_dir.join(&sidecar_file);
+            if path_with_triple.exists() { return Ok(path_with_triple); }
 
-                if prod_path.exists() {
-                    ffmpeg_path = prod_path;
-                } else if resource_path.exists() {
-                    ffmpeg_path = resource_path;
-                }
-            }
+            // Intento B: Nombre simple (por si el MSI lo renombró al instalar)
+            let path_simple = exe_dir.join("ffmpeg.exe");
+            if path_simple.exists() { return Ok(path_simple); }
         }
     }
 
-    if !ffmpeg_path.exists() {
-        return Err(format!("FFmpeg no encontrado. Archivo esperado: {}", ffmpeg_name));
+    // --- 3. RUTA DE RECURSOS (Fallback de Tauri) ---
+    if let Ok(res_path) = app.path().resource_dir() {
+        let res_file = res_path.join(&sidecar_file);
+        if res_file.exists() { return Ok(res_file); }
     }
 
-    Ok(ffmpeg_path)
+    // Si llegamos aquí, el archivo NO está donde creemos. 
+    // Vamos a dar un error mucho más detallado para saber qué está pasando.
+    let current_dir = std::env::current_exe()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|_| "Unknown".into());
+
+    Err(format!(
+        "ERROR CRÍTICO: FFmpeg no hallado.\n\
+        Ejecutable actual en: {}\n\
+        Buscaba el archivo: {}\n\
+        Por favor, verifica si el archivo tiene el triple exacto en su nombre.", 
+        current_dir, sidecar_file
+    ))
 }
 
 #[tauri::command]
