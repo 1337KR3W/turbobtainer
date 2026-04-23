@@ -1,167 +1,215 @@
+use std::path::PathBuf;
+use std::sync::Mutex;
+use tauri_plugin_shell::process::{CommandEvent, CommandChild}; 
 use tauri_plugin_shell::ShellExt;
-use tauri::{Emitter, Manager};
+use tauri::{AppHandle, Manager, Emitter};
 
 #[derive(serde::Serialize)]
 pub struct VideoMetadata {
     pub title: String,
     pub thumbnail: String,
     pub duration: String,
-    pub size: String
+    pub size: String,
+    pub has_playlist: bool
 }
 
-#[tauri::command]
-pub async fn check_video_url(app: tauri::AppHandle, url: String) -> Result<VideoMetadata, String> {
-    if url.trim().is_empty() {
-        return Err("The URL cannot be empty.".into());
-    }
+#[derive(serde::Deserialize)]
+struct YtDlpOutput {
+    title: Option<String>,
+    thumbnail: Option<String>,
+    duration_string: Option<String>,
+    filesize: Option<f64>,
+    filesize_approx: Option<f64>
+}
 
-    let sidecar = app.shell().sidecar("yt-dlp").map_err(|e| {
-        format!("SYSTEM_ERROR: Download engine not available. ({})", e)
-    })?;
+pub struct DownloadState {
+    pub child: Mutex<Option<CommandChild>>, 
+}
 
-    let output = sidecar
-        .args([
-            "--quiet",
-            "--no-warnings", 
-            "--no-playlist", 
-            "--skip-download",
-            "--print", "{\"title\":%(title)j, \"thumbnail\":%(thumbnail)j, \"duration\":%(duration_string)j, \"size\":%(filesize,filesize_approx)j}", 
-            &url
-            ])
-        .output()
-        .await
-        .map_err(|e| format!("EXECUTION_ERROR: Could not initiate analysis. ({})", e))?;
-
-    if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let json_line = stdout.lines().next().unwrap_or("{}");
-        let v: serde_json::Value = serde_json::from_str(json_line).map_err(|e| {
-            format!("JSON_PARSE_ERROR: {}. Raw: {}", e, json_line)
-        })?;
-        
-        Ok(VideoMetadata {
-            title: v["title"].as_str().unwrap_or("Unknown Title").to_string(),
-            thumbnail: v["thumbnail"].as_str().unwrap_or("").to_string(),
-            duration: v["duration"].as_str().unwrap_or("00:00").to_string(),
-            size: match v["size"].as_f64() {
-                Some(bytes) => {
-                    let mb = bytes / 1024.0 / 1024.0;
-                    format!("{:.2} MB", mb)
-                },
-                None => "Unknown size".to_string(),
-            },
-        })
-        
-    } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(stderr.trim().to_string())
+impl Default for DownloadState {
+    fn default() -> Self {
+        Self {
+            child: Mutex::new(None),
+        }
     }
 }
 
-#[tauri::command]
-pub async fn download_video(app: tauri::AppHandle, url: String, tipo: String) -> Result<String, String> {
-    
+fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
     let target_triple = tauri::utils::platform::target_triple().unwrap_or_default();
-    let ffmpeg_name = format!("ffmpeg-{}.exe", target_triple);
-    
-    // --- LÓGICA DE DETECCIÓN DE ENTORNO ---
-    
-    // 1. Intentamos la ruta de DESARROLLO (src-tauri/bin)
-    // Usamos CARGO_MANIFEST_DIR que solo existe cuando compilas/ejecutas con cargo
-    let mut ffmpeg_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+    let sidecar_file = format!("ffmpeg-{}.exe", target_triple);
+
+    // --- 1. RUTA DE DESARROLLO (Cargo) ---
+    let dev_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("bin")
-        .join(&ffmpeg_name);
+        .join(&sidecar_file);
+    if dev_path.exists() { return Ok(dev_path); }
 
-    // 2. Si no existe (estamos en el .msi instalado), buscamos en PRODUCCIÓN
-    if !ffmpeg_path.exists() {
-        // En producción, el Sidecar suele estar en el mismo directorio que el .exe
-        // o en la carpeta de recursos que nos da Tauri.
-        if let Ok(exe_path) = std::env::current_exe() {
-            if let Some(exe_dir) = exe_path.parent() {
-                // Opción A: Al lado del ejecutable (común en instalaciones planas)
-                let prod_path = exe_dir.join(&ffmpeg_name);
-                
-                // Opción B: En la carpeta de recursos de Tauri
-                let resource_path = app.path().resource_dir()
-                    .unwrap_or_default()
-                    .join("_up_")
-                    .join("bin")
-                    .join(&ffmpeg_name);
+    // --- 2. RUTA DE PRODUCCIÓN (Junto al EXE) ---
+    // Usamos std::env::current_exe() pero lo normalizamos
+    if let Ok(mut exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            // Intento A: Nombre con triple (como está en tu carpeta de instalación)
+            let path_with_triple = exe_dir.join(&sidecar_file);
+            if path_with_triple.exists() { return Ok(path_with_triple); }
 
-                if prod_path.exists() {
-                    ffmpeg_path = prod_path;
-                } else if resource_path.exists() {
-                    ffmpeg_path = resource_path;
-                }
-            }
+            // Intento B: Nombre simple (por si el MSI lo renombró al instalar)
+            let path_simple = exe_dir.join("ffmpeg.exe");
+            if path_simple.exists() { return Ok(path_simple); }
         }
     }
 
-    // --- VERIFICACIÓN FINAL ---
-    if !ffmpeg_path.exists() {
-        return Err(format!(
-            "FFmpeg no encontrado. Buscado en Dev y Prod. Archivo esperado: {}", 
-            ffmpeg_name
-        ));
+    // --- 3. RUTA DE RECURSOS (Fallback de Tauri) ---
+    if let Ok(res_path) = app.path().resource_dir() {
+        let res_file = res_path.join(&sidecar_file);
+        if res_file.exists() { return Ok(res_file); }
     }
 
-    let ffmpeg_str = ffmpeg_path.to_string_lossy().to_string();
+    // Si llegamos aquí, el archivo NO está donde creemos. 
+    // Vamos a dar un error mucho más detallado para saber qué está pasando.
+    let current_dir = std::env::current_exe()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|_| "Unknown".into());
 
-    // --- CONFIGURACIÓN DE DESCARGA ---
-    let download_dir = app.path().download_dir()
-        .map_err(|e| format!("Error en ruta de descargas: {}", e))?;
+    Err(format!(
+        "ERROR CRÍTICO: FFmpeg no hallado.\n\
+        Ejecutable actual en: {}\n\
+        Buscaba el archivo: {}\n\
+        Por favor, verifica si el archivo tiene el triple exacto en su nombre.", 
+        current_dir, sidecar_file
+    ))
+}
 
-    let output_str = download_dir.join("%(title).150s_Turbobtainer_%(epoch)s.%(ext)s")
-        .to_string_lossy().to_string();
+#[tauri::command]
+pub async fn check_video_url(app: AppHandle, url: String) -> Result<VideoMetadata, String> {
+    if url.trim().is_empty() { return Err("The URL cannot be empty.".into()); }
+    
+    let has_playlist = url.contains("youtube.com") && url.contains("list=");
+    
+    let output = app.shell().sidecar("yt-dlp")
+        .map_err(|e| format!("SYSTEM_ERROR: Download engine not available. ({})", e))?
+        .args([
+            "--quiet",
+            "--no-warnings",
+            "--no-playlist",
+            "--skip-download",
+            "--dump-json",
+            &url
+        ])
+        .output().await
+        .map_err(|e| format!("EXECUTION_ERROR: Could not initiate analysis. ({})", e))?;
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let raw: YtDlpOutput = serde_json::from_str(&stdout)
+        .map_err(|e| format!("JSON_PARSE_ERROR: {}", e))?;
+
+    let size_bytes = raw.filesize.or(raw.filesize_approx).unwrap_or(0.0);
+    
+    Ok(VideoMetadata {
+        title: raw.title.unwrap_or_else(|| "Unknown Title".into()),
+        thumbnail: raw.thumbnail.unwrap_or_default(),
+        duration: raw.duration_string.unwrap_or_else(|| "00:00".into()),
+        size: format!("{:.2} MB", size_bytes / 1048576.0),
+        has_playlist,
+    })
+}
+
+#[tauri::command]
+pub async fn download_video(
+    app: AppHandle,
+    state: tauri::State<'_, DownloadState>,
+    url: String,
+    stype: String,
+    download_playlist: bool,
+) -> Result<String, String> {
+    let ffmpeg_path = get_ffmpeg_path(&app)?;
+    let download_dir = app.path().download_dir().map_err(|e| e.to_string())?;
+
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    
+    let folder_name = format!("Turbobtainer_{}", timestamp);
+
+    let output_tmpl = if download_playlist {
+        download_dir
+            .join(&folder_name)
+            .join("%(playlist_title).100s")
+            .join("%(title).100s.%(ext)s")
+    } else {
+        download_dir.join(format!("%(title).150s_{}.%(ext)s", folder_name))
+    };
+
+    let output_str = output_tmpl.to_string_lossy().to_string();
 
     let mut args = vec![
-        "--newline", "--progress",
-        "--progress-template", "PROG:%(progress._percent_str)s",
-        "--no-playlist", "--no-overwrites",
+        "--newline",
+        "--progress",
+        "--progress-template", "PROG:%(progress._percent_str)s | TITLE:%(info.title)s",
         "-o", &output_str,
-        "--ffmpeg-location", &ffmpeg_str, // LA RUTA QUE HEMOS CALCULADO
+        "--ffmpeg-location", ffmpeg_path.to_str().ok_or("Invalid path")?,
+        "--restrict-filenames",
     ];
 
-    if tipo == "audio" {
-        args.extend(["-x", "--audio-format", "mp3", "--audio-quality", "0"]);
+    if !download_playlist {
+        args.push("--no-playlist");
     } else {
-        args.extend([
-            "--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-            "--merge-output-format", "mp4"
-        ]);
+        args.push("--yes-playlist");
     }
 
+    if stype == "audio" {
+        args.extend(["-x", "--audio-format", "mp3", "--audio-quality", "0"]);
+    } else {
+        args.extend(["-f", "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b", "--merge-output-format", "mp4"]);
+    }
+    
     args.push(&url);
 
-    // --- EJECUCIÓN ---
-    let (mut rx, _child) = app.shell()
-        .sidecar("yt-dlp")
-        .map_err(|e| format!("Sidecar error yt-dlp: {}", e))?
+    let (mut rx, child) = app.shell().sidecar("yt-dlp")
+        .map_err(|e| e.to_string())?
         .args(args)
         .spawn()
-        .map_err(|e| format!("Error al iniciar proceso: {}", e))?;
-
-    // (El resto del tauri::async_runtime::spawn se queda igual...)
+        .map_err(|e| e.to_string())?;
+    
+    // Guardamos el proceso para que stop_download funcione
+    {
+        let mut lock = state.child.lock().unwrap();
+        *lock = Some(child); 
+    }
+    
     tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
             match event {
-                tauri_plugin_shell::process::CommandEvent::Stdout(line) => {
+                CommandEvent::Stdout(line) => {
                     let out = String::from_utf8_lossy(&line);
-                    if out.contains("PROG:") {
-                        if let Some(parts) = out.split("PROG:").nth(1) {
-                            let clean_num: String = parts.chars()
-                                .filter(|c| c.is_ascii_digit() || *c == '.')
-                                .collect();
-                            if let Ok(pct_f) = clean_num.parse::<f32>() {
-                                let val = pct_f / 100.0;
-                                let _ = app.emit("download-progress", if val < 1.0 { val } else { 0.99 });
-                            }
+    
+                    if out.contains("Downloading playlist:") {
+                        if let Some(playlist_name) = out.split("Downloading playlist: ").last() {
+                            let _ = app.emit("playlist-title", playlist_name.trim());
+                        }
+                    }
+    
+                    if let Some(pos_prog) = out.find("PROG:") {
+                        let raw_pct = out[pos_prog + 5..].split('|').next().unwrap_or("").trim().trim_end_matches('%');
+                        if let Ok(pct) = raw_pct.parse::<f32>() {
+                            let _ = app.emit("download-progress", pct / 100.0);
+                        }
+                    }
+    
+                    if let Some(pos_title) = out.find("TITLE:") {
+                        let title = out[pos_title + 6..].trim();
+                        if !title.is_empty() {
+                            let _ = app.emit("item-title", title);
                         }
                     }
                 },
-                tauri_plugin_shell::process::CommandEvent::Terminated(payload) => {
+                CommandEvent::Terminated(payload) => {
                     if payload.code == Some(0) {
-                        let _ = app.emit("download-progress", 1.0);
+                        let _ = app.emit("download-finished", true);
                     }
                 },
                 _ => {}
@@ -169,5 +217,15 @@ pub async fn download_video(app: tauri::AppHandle, url: String, tipo: String) ->
         }
     });
 
-    Ok("Descarga iniciada".into())
+    Ok("Download started".into())
+}
+
+#[tauri::command]
+pub async fn stop_download(state: tauri::State<'_, DownloadState>) -> Result<(), String> {
+    let mut lock = state.child.lock().unwrap();
+    if let Some(mut child) = lock.take() { 
+        let _ = child.kill();
+        println!("Download aborted by user.");
+    }
+    Ok(())
 }

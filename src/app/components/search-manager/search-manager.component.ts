@@ -20,7 +20,7 @@ import {
 export class SearchManagerComponent {
   @Input() url: string = '';
   @Input() status: string = 'IDLE';
-  @Input() tipoSeleccionado: "audio" | "video" | "gallery" | string | null | undefined = null;
+  @Input() selectedType: "audio" | "video" | "gallery" | string | null | undefined = null;
   @Input() animeCount: number = 0;
 
   // Helpers para validación (pasados desde el padre o lógica simple)

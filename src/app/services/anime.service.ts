@@ -6,7 +6,7 @@ import { Anime, Episode, StreamSource, AnimeState } from '../models/anime.model'
     providedIn: 'root'
 })
 export class AnimeService {
-    // Estado privado con Signals
+
     private readonly _state = signal<AnimeState>({
         status: 'IDLE',
         results: [],
@@ -14,21 +14,15 @@ export class AnimeService {
         currentStream: null
     });
 
-    // Exposición de estados como solo lectura para los componentes
     public state = this._state.asReadonly();
     public results = computed(() => this._state().results);
     public episodes = computed(() => this._state().episodes);
 
     constructor() { }
 
-    /**
-     * Busca animes por texto usando el motor de Rust
-     */
     async searchAnime(query: string) {
         if (!query.trim()) return;
-
         this._state.update(s => ({ ...s, status: 'SEARCHING', results: [] }));
-
         try {
             const results = await invoke<Anime[]>('search_anime', { query });
             this._state.update(s => ({ ...s, status: 'IDLE', results }));
@@ -37,9 +31,6 @@ export class AnimeService {
         }
     }
 
-    /**
-     * Obtiene la lista de episodios de una serie
-     */
     async getEpisodes(animeUrl: string) {
         this._state.update(s => ({ ...s, status: 'LOADING_EPISODES', episodes: [] }));
 
@@ -51,9 +42,6 @@ export class AnimeService {
         }
     }
 
-    /**
-     * Extrae el link de video directo de un episodio
-     */
     async getStream(episodeUrl: string) {
         this._state.update(s => ({ ...s, status: 'GETTING_STREAM', currentStream: null }));
 
@@ -76,6 +64,5 @@ export class AnimeService {
     resetStream() {
         this._state.update(s => ({ ...s, currentStream: null, status: 'IDLE' }));
     }
-
 
 }

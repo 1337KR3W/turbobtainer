@@ -8,9 +8,9 @@
                         <ion-label>Title: <strong>{{state.videoTitle}}</strong></ion-label>
                     </ion-item>
                     }
-                    @if (state.tipoSeleccionado) {
+                    @if (state.selectedType) {
                     <ion-item>
-                        <ion-label>Format: <strong>{{ state.tipoSeleccionado | uppercase}}</strong></ion-label>
+                        <ion-label>Format: <strong>{{ state.selectedType | uppercase}}</strong></ion-label>
                     </ion-item>
                     }
                     @if (state.duration) {
@@ -23,15 +23,23 @@
                         <ion-label>Size: <strong>{{ state.size }}</strong></ion-label>
                     </ion-item>
                     }
+                    @if (state.hasPlaylist) {
+                    <ion-item>
+                        <ion-label>Download full playlist</ion-label>
+                        <ion-toggle labelPlacement="start" [checked]="state.shouldDownloadPlaylist"
+                            (ionChange)="playlistToggle.emit($event.detail.checked)">
+                        </ion-toggle>
+                    </ion-item>
+                    }
                     @if (state.imageCount) {
                     <ion-item>
                         <ion-label>Images: <strong>{{ state.imageCount }} items</strong></ion-label>
                     </ion-item>
                     }
-                    @if (state.mensaje && state.tipoSeleccionado === 'gallery') {
+                    @if (state.message && state.selectedType === 'gallery') {
                     <ion-item>
                         <ion-label class="ion-text-wrap">
-                            <small>{{ state.mensaje }}</small>
+                            <small>{{ state.message }}</small>
                         </ion-label>
                     </ion-item>
                     }
@@ -40,7 +48,7 @@
 
             <ion-col size="12" size-sm="4" class="ion-text-center">
                 <div class="thumbnail-wrapper">
-                    @if (state.tipoSeleccionado === 'gallery' && state.sourceLogo) {
+                    @if (state.selectedType === 'gallery' && state.sourceLogo) {
                     <div class="platform-logo-container">
                         <img [src]="state.sourceLogo" class="gallery-platform-icon" alt="Platform">
                         <p class="source-text">Source Platform</p>
@@ -55,14 +63,19 @@
         </ion-row>
     </ion-grid>
 
+
+
     <ion-footer class="ion-no-border ion-padding">
         <ion-button type="button" expand="block" class="btn-primary" (click)="download.emit()">
             <ion-icon name="cloud-download-outline" slot="start"></ion-icon>
-            Turbobtain
+            {{ state.shouldDownloadPlaylist ? 'Turbobtain Playlist' : 'Turbobtain' }}
         </ion-button>
         <ion-button type="button" fill="clear" expand="block" color="medium" (click)="cancel.emit()">
+
             <ion-icon name="trash-outline" slot="start"></ion-icon>
+
             Cancel
+
         </ion-button>
     </ion-footer>
 </ion-card>

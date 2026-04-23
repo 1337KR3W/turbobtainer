@@ -11,77 +11,82 @@ export class TauriService implements OnDestroy {
   private readonly _state = signal<AppState>({ status: 'IDLE' });
   public state = this._state.asReadonly();
   private unlistenProgress?: UnlistenFn;
-  private urlMemoria: string = '';
+  private urlMemory: string = ''; // Renombrado de urlMemoria
   private readonly injector = inject(Injector);
 
   constructor() {
-
     this.setupListeners();
-    this.testGallery();
-  }
-
-  async testGallery() {
-    try {
-      const version = await invoke('check_gallery_binary');
-      console.log('Gallery-dl Version:', version);
-    } catch (error) {
-      console.error('Error calling sidecar:', error);
-    }
   }
 
   private async setupListeners() {
     try {
-      this.unlistenProgress = await listen<number>('download-progress', (event) => {
-        const progreso = event.payload;
-
-        if (progreso === 1) {
-          this._state.update(s => ({
-            ...s,
-            status: 'SUCCESS',
-            progreso: 1
-          }));
-        } else {
-          this._state.update(s => ({
-            ...s,
-            status: 'DOWNLOADING',
-            progreso: progreso
-          }));
-        }
+      // Escucha el nombre real de la Playlist
+      await listen<string>('playlist-title', (event) => {
+        this._state.update(s => ({
+          ...s,
+          videoTitle: event.payload // Sobrescribimos el título del video por el de la playlist
+        }));
       });
+
+      // Listener para el título del item individual
+      await listen<string>('item-title', (event) => {
+        this._state.update(s => ({ ...s, current_item_title: event.payload }));
+      });
+
+      // Listener para el progreso
+      this.unlistenProgress = await listen<number>('download-progress', (event) => {
+        this._state.update(s => ({ ...s, progress: event.payload }));
+      });
+
+      // Listener para finalizar
+      await listen<boolean>('download-finished', (_) => {
+        this._state.update(s => ({ ...s, status: 'SUCCESS', progress: 1 }));
+      });
+
     } catch (error) {
-      console.error('Error:', error);
+      console.error(error);
     }
   }
-  async getMetadata(url: string, tipo: 'audio' | 'video') {
-    this.urlMemoria = url;
-    this._state.set({ status: 'ANALYZING', tipoSeleccionado: tipo });
+
+  async getMetadata(url: string, type: 'audio' | 'video') {
+    this.urlMemory = url;
+    this._state.set({ status: 'ANALYZING', selectedType: type });
 
     try {
+      // Rust ahora devuelve VideoMetadata con has_playlist
       const metadata = await invoke<any>('check_video_url', { url });
+
       this._state.set({
         status: 'READY',
-        tipoSeleccionado: tipo,
+        selectedType: type,
         videoTitle: metadata.title,
         thumbnail: metadata.thumbnail,
         duration: metadata.duration,
         size: metadata.size,
-        progreso: 0
+        hasPlaylist: metadata.has_playlist, // <--- Nueva propiedad
+        shouldDownloadPlaylist: false,      // Por defecto no descargamos la lista completa
+        progress: 0,
       });
     } catch (error) {
       this._state.set({
         status: 'ERROR',
-        mensaje: error as string
+        message: error as string
       });
     }
   }
+
+  togglePlaylist(value: boolean) {
+    this._state.update(s => ({ ...s, shouldDownloadPlaylist: value }));
+  }
+
   async getMetadataGallery(url: string) {
-    this.urlMemoria = url;
+    this.urlMemory = url;
     const utils = this.injector.get(UtilsService);
     const logo = utils.getPlatformLogo(url);
 
     this._state.set({
       status: 'ANALYZING',
-      tipoSeleccionado: 'gallery',
+      selectedType: 'gallery',
       thumbnail: undefined
     });
 
@@ -90,71 +95,83 @@ export class TauriService implements OnDestroy {
 
       this._state.set({
         status: 'READY',
-        tipoSeleccionado: 'gallery',
+        selectedType: 'gallery',
         videoTitle: metadata.title,
         sourceLogo: logo,
         imageCount: metadata.count,
-        mensaje: metadata.description,
-        progreso: 0
+        message: metadata.description,
+        progress: 0
       });
     } catch (error) {
       this._state.set({
         status: 'ERROR',
-        mensaje: error as string
+        message: error as string
       });
     }
   }
 
-  async checkUrlType(url: string, tipo: 'audio' | 'video' | 'gallery') {
-    if (tipo === 'gallery') {
+  async checkUrlType(url: string, type: 'audio' | 'video' | 'gallery') {
+    if (type === 'gallery') {
       return this.getMetadataGallery(url);
     } else {
-      return this.getMetadata(url, tipo);
+      return this.getMetadata(url, type);
     }
   }
 
   async startDownload() {
-    const actual = this._state();
-    if (actual.status !== 'READY') return;
+    const current = this._state(); // Renombrado de actual
+    if (current.status !== 'READY') return;
 
-    this._state.update(s => ({ ...s, status: 'DOWNLOADING', progreso: 0 }));
+    this._state.update(s => ({ ...s, status: 'DOWNLOADING', progress: 0, current_item_title: '' }));
 
     try {
-      if (actual.tipoSeleccionado === 'gallery') {
-        const totalItems = actual.imageCount || 0;
-        const resultado = await invoke<string>('download_gallery', {
-          url: this.urlMemoria,
+      if (current.selectedType === 'gallery') {
+        const totalItems = current.imageCount || 0;
+        await invoke<string>('download_gallery', {
+          url: this.urlMemory,
           totalItems: totalItems
         });
 
-        console.log(resultado);
-        this._state.update(s => ({
-          ...s,
-          status: 'SUCCESS',
-          progreso: 1
-        }));
-
+        this._state.update(s => ({ ...s, status: 'SUCCESS', progress: 1 }));
       } else {
+        // --- AQUÍ EL CAMBIO CLAVE PARA RUST ---
         await invoke('download_video', {
-          url: this.urlMemoria,
-          tipo: actual.tipoSeleccionado
+          url: this.urlMemory,
+          stype: current.selectedType,
+          downloadPlaylist: current.shouldDownloadPlaylist || false // Enviamos el booleano
         });
       }
-
     } catch (error) {
-      console.error('Error en la descarga:', error);
-      this._state.set({ status: 'ERROR', mensaje: error as string });
+      console.error('Download error:', error);
+      this._state.set({ status: 'ERROR', message: error as string });
     }
   }
 
   reset() {
-    this.urlMemoria = '';
+    this.urlMemory = '';
     this._state.set({ status: 'IDLE' });
   }
 
   ngOnDestroy() {
     if (this.unlistenProgress) {
       this.unlistenProgress();
+    }
+  }
+
+  async stopDownload() {
+    try {
+      await invoke('stop_download');
+      this._state.update(s => ({
+        ...s,
+        status: 'IDLE',
+        progress: 0,
+        current_item_title: undefined
+      }));
+
+    } catch (error) {
+      console.error('Downloading error:', error);
+
+      this.reset();
     }
   }
 }

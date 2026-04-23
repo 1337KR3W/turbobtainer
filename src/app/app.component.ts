@@ -27,13 +27,13 @@ export class AppComponent {
 
   url: string = '';
   constructor(public utilsService: UtilsService) { }
-  async checkUrlType(tipo: 'audio' | 'video' | 'gallery') {
+  async checkUrlType(type: 'audio' | 'video' | 'gallery') {
     if (!this.url) return;
 
-    if (tipo === 'gallery') {
+    if (type === 'gallery') {
       await this.tauri.getMetadataGallery(this.url);
     } else {
-      await this.tauri.getMetadata(this.url, tipo);
+      await this.tauri.getMetadata(this.url, type);
     }
   }
 

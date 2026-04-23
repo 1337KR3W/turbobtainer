@@ -13,5 +13,6 @@ export const SUPPORTED_PLATFORMS: string[] = [
     'fantia', 'boosty', 'kemono', 'coomer', 'erome', 'xvideos', 'xhamster', 'pornhub',
     'motherless', 'redgifs', 'hentai', 'imagetwist', 'imagevenue', 'imgadult', 'imgclick',
     'imgdrive', 'imgpv', 'imgspice', 'imgtaxi', 'imgwallet', 'imx.to', 'picstate',
-    'pixhost', 'postimages', 'silverpic', 'turboimagehost', 'vipr.im'
+    'pixhost', 'postimages', 'silverpic', 'turboimagehost', 'vipr.im', 'audiochan', 'bsky',
+    'dandadan', 'discord', 'dynasty-scans', 'turbo', 'niter', 'mediawiki', 'civitai'
 ];

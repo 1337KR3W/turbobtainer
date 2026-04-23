@@ -1,3 +1,5 @@
+use crate::commands::DownloadState;
+
 mod commands;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -5,10 +7,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
+        .manage(DownloadState::default())
         .invoke_handler(tauri::generate_handler![
             // Comandos de Media (yt-dlp)
             commands::check_video_url,
             commands::download_video,
+            commands::stop_download,
 
             // Comandos de Gallery (gallery-dl)
             commands::check_gallery_binary,

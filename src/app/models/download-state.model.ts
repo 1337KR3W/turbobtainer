@@ -2,13 +2,16 @@ export type DownloadStatus = 'IDLE' | 'ANALYZING' | 'READY' | 'DOWNLOADING' | 'S
 
 export interface AppState {
     status: DownloadStatus;
-    mensaje?: string;
+    message?: string;
     videoTitle?: string;
-    tipoSeleccionado?: 'audio' | 'video' | 'gallery';
+    selectedType?: 'audio' | 'video' | 'gallery';
     thumbnail?: string;
     sourceLogo?: string;
     duration?: string;
     size?: string;
+    hasPlaylist?: boolean;
+    shouldDownloadPlaylist?: boolean;
+    isProcesing?: boolean;
     imageCount?: number;
-    progreso?: number;
+    progress?: number;
 }

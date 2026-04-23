@@ -16,7 +16,10 @@ import {
     checkmarkCircle,
     tvOutline,
     arrowBackOutline,
-    openOutline
+    openOutline,
+    expandOutline,
+    informationCircleOutline,
+    listOutline
 } from 'ionicons/icons';
 import { TauriService } from './tauri.service';
 import { ModalController } from '@ionic/angular/standalone';
@@ -53,7 +56,11 @@ export class UtilsService {
             'checkmark-circle': checkmarkCircle,
             'tv-outline': tvOutline,
             'arrow-back-outline': arrowBackOutline,
-            'open-outline': openOutline
+            'open-outline': openOutline,
+            'expand-outline': expandOutline,
+            'information-circle-outline': informationCircleOutline,
+            'list-outline': listOutline
+
         });
     }
 

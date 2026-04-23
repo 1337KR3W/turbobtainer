@@ -41,6 +41,43 @@ ion-card {
     margin: 0 auto;
 }
 
+
+
+
+ion-toggle {
+
+
+    --handle-background: var(--turbo-red-dark);
+    --track-background: var(--turbo-red-glow);
+
+
+
+
+    --handle-width: 15px;
+    --handle-height: 15px;
+    --handle-max-height: auto;
+
+
+    --handle-border-radius: 12px;
+    --handle-box-shadow: none;
+
+    /* Color cuando está ENCENDIDO (Rojo) */
+    &.toggle-checked {
+        --track-background-checked: var(--turbo-red-dark);
+        --handle-background-checked: var(--turbo-red-vibrant);
+    }
+
+    /* Estilo visual del "camino" (track) */
+    &::part(track) {
+        height: 15px;
+        width: 35px;
+        /* Required for iOS handle to overflow the height of the track */
+        overflow: visible;
+
+    }
+}
+
+
 .platform-logo-container {
     text-align: center;
 
@@ -64,4 +101,8 @@ ion-card {
     --color: var(--turbo-black);
     font-weight: bold;
     margin-top: 10px;
+}
+
+.text-red {
+    color: var(--turbo-red-vibrant);
 }
